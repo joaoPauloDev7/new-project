@@ -1,15 +1,1 @@
-<app-cabecalho></app-cabecalho>
-<app-menu (selecao)="onSelecionado($event)"></app-menu>
-
-@if (secaoAtiva === 'noticias') {
-  <app-noticias></app-noticias>
-}
-@else if (secaoAtiva === 'lives') {
-  <app-lives></app-lives>
-}
-@else if (secaoAtiva === 'locais') {
-  <app-locais></app-locais>
-}
-@else if (secaoAtiva === 'vaqueiros') {
-  <app-vaqueiros></app-vaqueiros>
-}
+<router-outlet></router-outlet>
