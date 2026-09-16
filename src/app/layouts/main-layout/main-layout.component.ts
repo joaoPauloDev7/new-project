@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CabecalhoComponent } from '../../shared/components/cabecalho/cabecalho.component';
 import { MenuComponent } from '../../shared/components/menu/menu.component';
@@ -13,6 +13,13 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class MainLayoutComponent {
   private authService = inject(AuthService);
+
+  // Responsive state for sidebar collapsing
+  isSidebarCollapsed = signal<boolean>(false);
+
+  toggleSidebar(): void {
+    this.isSidebarCollapsed.update(val => !val);
+  }
 
   onLogout(): void {
     this.authService.logout();

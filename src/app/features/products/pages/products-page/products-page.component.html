@@ -1,0 +1,296 @@
+<div class="products-container animate-fade-in">
+  <div class="products-header">
+    <div>
+      <h1>Gerenciamento de Produtos</h1>
+      <p class="subtitle">Cadastre, edite e organize a vitrine da Barone Imports.</p>
+    </div>
+    <button class="add-btn" (click)="openAddModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Novo Produto
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="control-bar">
+    <div class="search-box">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" placeholder="Filtrar por nome ou SKU..." class="search-input" />
+    </div>
+  </div>
+
+  <!-- Products List Table -->
+  <div class="table-card">
+    <table class="products-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>SKU</th>
+          <th class="num-col">Preço</th>
+          <th class="num-col">Preço Promo</th>
+          <th class="num-col">Estoque</th>
+          <th>Cores</th>
+          <th>Tamanhos</th>
+          <th>Status</th>
+          <th class="action-col">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (prod of products(); track prod.id) {
+          <tr>
+            <td>
+              <div class="item-detail">
+                <img [src]="prod.images[0].url" [alt]="prod.name" class="item-thumb" />
+                <div class="item-text">
+                  <span class="item-name">{{ prod.name }}</span>
+                  <span class="item-gender-badge">{{ prod.gender }}</span>
+                </div>
+              </div>
+            </td>
+            <td><code class="sku-code">{{ prod.sku }}</code></td>
+            <td class="num-col">R$ {{ prod.price.toFixed(2) }}</td>
+            <td class="num-col">
+              @if (prod.pricePromo) {
+                <span class="text-success">R$ {{ prod.pricePromo.toFixed(2) }}</span>
+              } @else {
+                <span class="text-muted">-</span>
+              }
+            </td>
+            <td class="num-col">
+              <span [class.text-danger]="prod.stock === 0" [class.text-success]="prod.stock > 10">
+                {{ prod.stock }} un
+              </span>
+            </td>
+            <td>{{ prod.colors.join(', ') || '-' }}</td>
+            <td>{{ prod.sizes.join(', ') || '-' }}</td>
+            <td>
+              @if (prod.status) {
+                <span class="badge badge-success">Ativo</span>
+              } @else {
+                <span class="badge badge-muted">Inativo</span>
+              }
+            </td>
+            <td class="action-col">
+              <div class="action-buttons">
+                <button class="row-btn" aria-label="Editar">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+                <button class="row-btn delete-btn" (click)="deleteProduct(prod.id)" aria-label="Excluir">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="9" class="empty-row">Nenhum produto cadastrado.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add Product Modal Overlay -->
+  @if (showModal()) {
+    <div class="modal-overlay animate-fade-in">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>Cadastrar Novo Produto</h2>
+          <button class="close-modal-btn" (click)="closeModal()" aria-label="Fechar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="modal-body-form" novalidate>
+          <div class="form-columns">
+            <!-- Left Side Details -->
+            <div class="form-left-col">
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label class="form-label" for="prod-name">Nome do Produto</label>
+                  <input id="prod-name" type="text" formControlName="name" class="form-input" placeholder="ex: Camiseta Pima Black" />
+                </div>
+                <div class="form-group flex-1">
+                  <label class="form-label" for="prod-sku">SKU</label>
+                  <input id="prod-sku" type="text" formControlName="sku" class="form-input" placeholder="ex: BI-TSH-001" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label class="form-label" for="prod-price">Preço (R$)</label>
+                  <input id="prod-price" type="number" formControlName="price" class="form-input" />
+                </div>
+                <div class="form-group flex-1">
+                  <label class="form-label" for="prod-promo">Preço Promocional (R$)</label>
+                  <input id="prod-promo" type="number" formControlName="pricePromo" class="form-input" placeholder="Vazio caso não tenha" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label class="form-label" for="prod-stock">Qtd em Estoque</label>
+                  <input id="prod-stock" type="number" formControlName="stock" class="form-input" />
+                </div>
+                <div class="form-group flex-1">
+                  <label class="form-label" for="prod-gender">Gênero</label>
+                  <select id="prod-gender" formControlName="gender" class="form-input">
+                    <option value="Masculino">Masculino</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Unissex">Unissex</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row flags-row">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="status" />
+                  <span>Produto Ativo</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="highlight" />
+                  <span>Destaque</span>
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="newLaunch" />
+                  <span>Novo Lançamento</span>
+                </label>
+              </div>
+
+              <!-- Sizing Grid -->
+              <div class="form-group">
+                <span class="form-label">Tamanhos Disponíveis</span>
+                <div class="sizes-selector-grid">
+                  @for (sz of availableSizes; track sz) {
+                    <button 
+                      type="button" 
+                      class="size-pill-btn" 
+                      [class.selected]="selectedSizes().includes(sz)"
+                      (click)="toggleSize(sz)"
+                    >
+                      {{ sz }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Colors Grid -->
+              <div class="form-group">
+                <span class="form-label">Cores Disponíveis</span>
+                <div class="colors-selector-grid">
+                  @for (col of availableColors; track col) {
+                    <button 
+                      type="button" 
+                      class="color-pill-btn" 
+                      [class.selected]="selectedColors().includes(col)"
+                      (click)="toggleColor(col)"
+                    >
+                      {{ col }}
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="prod-desc">Descrição do Produto</label>
+                <textarea id="prod-desc" formControlName="description" rows="3" class="form-input textarea-input" placeholder="Detalhes técnicos, tecido, corte..."></textarea>
+              </div>
+            </div>
+
+            <!-- Right Side Image Dropzone -->
+            <div class="form-right-col">
+              <span class="form-label">Fotos do Produto</span>
+              
+              <div 
+                class="drag-drop-zone"
+                [class.drag-over]="dragOver()"
+                (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave($event)"
+                (drop)="onDrop($event)"
+                (click)="fileInput.click()"
+              >
+                <input 
+                  type="file" 
+                  #fileInput 
+                  (change)="onFileSelected($event)" 
+                  multiple 
+                  accept="image/*" 
+                  style="display: none;" 
+                />
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                <p class="zone-text">Arraste as imagens aqui ou clique para upload.</p>
+                <span class="zone-info">PNG, JPG, WEBP (Max 5MB)</span>
+              </div>
+
+              <!-- Uploaded Previews -->
+              <div class="previews-list">
+                @for (img of uploadedImages(); track img.url; let idx = $index) {
+                  <div class="preview-item">
+                    <img [src]="img.url" class="preview-thumb" alt="Preview" />
+                    
+                    <div class="preview-actions">
+                      <div class="action-top">
+                        @if (img.isMain) {
+                          <span class="main-badge">Capa</span>
+                        } @else {
+                          <button type="button" class="action-pill-btn" (click)="setMainImage(idx)">Definir Capa</button>
+                        }
+                      </div>
+
+                      <div class="action-bottom">
+                        <!-- Up/Down sorting buttons -->
+                        <div class="sorting-controls">
+                          <button type="button" class="sort-btn" [disabled]="idx === 0" (click)="moveImageUp(idx)" aria-label="Subir imagem">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="18 15 12 9 6 15"></polyline>
+                            </svg>
+                          </button>
+                          <button type="button" class="sort-btn" [disabled]="idx === uploadedImages().length - 1" (click)="moveImageDown(idx)" aria-label="Descer imagem">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                          </button>
+                        </div>
+
+                        <!-- Trash remove button -->
+                        <button type="button" class="delete-img-btn-inline" (click)="removeImage(idx)" aria-label="Excluir">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="cancel-btn" (click)="closeModal()">Cancelar</button>
+            <button type="submit" class="submit-btn" [disabled]="productForm.invalid">Salvar Produto</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

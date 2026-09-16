@@ -1,11 +1,20 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { AuthCardComponent } from '../../components/auth-card/auth-card.component';
+import { AuthInputComponent } from '../../components/auth-input/auth-input.component';
+import { AuthButtonComponent } from '../../components/auth-button/auth-button.component';
 
 @Component({
   selector: 'app-login-page',
-  imports: [ReactiveFormsModule],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    AuthCardComponent,
+    AuthInputComponent,
+    AuthButtonComponent
+  ],
   standalone: true,
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss'
@@ -26,14 +35,6 @@ export class LoginPageComponent {
     password: ['', [Validators.required]]
   });
 
-  get email() {
-    return this.loginForm.get('email');
-  }
-
-  get password() {
-    return this.loginForm.get('password');
-  }
-
   onSubmit(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -47,7 +48,7 @@ export class LoginPageComponent {
 
     this.authService.login(credentials).subscribe({
       next: () => {
-        // Retrieve return URL from route parameters or default to '/' (which redirects to /noticias)
+        // Retrieve return URL from route parameters or default to '/'
         const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
         this.router.navigateByUrl(returnUrl);
         this.isLoading.set(false);
@@ -63,10 +64,5 @@ export class LoginPageComponent {
         }
       }
     });
-  }
-
-  onForgotPassword(event: Event): void {
-    event.preventDefault();
-    alert('Esta funcionalidade será implementada em breve.');
   }
 }

@@ -1,83 +1,157 @@
-.header-container {
+.topbar-container {
+  height: 64px;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
-  height: 100%;
+  padding: 0 2rem;
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 10;
 }
 
-.header-brand {
+.topbar-left {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  color: var(--primary);
+  gap: 1rem;
+}
+
+.breadcrumb-trail {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
   
-  .brand-icon {
-    transition: transform var(--transition-normal);
+  .breadcrumb-root {
+    color: var(--text-muted);
   }
   
-  &:hover .brand-icon {
-    transform: scale(1.1);
+  .breadcrumb-separator {
+    color: var(--text-muted);
+    opacity: 0.7;
+    margin-top: 0.125rem;
   }
   
-  .brand-name {
-    font-size: 1.25rem;
-    font-weight: 700;
+  .breadcrumb-current {
     color: var(--text-primary);
-    letter-spacing: -0.02em;
   }
 }
 
-.header-actions {
+.topbar-right {
   display: flex;
   align-items: center;
+  gap: 1.5rem;
 }
 
-.user-profile {
+.search-box {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-lg);
-  transition: background-color var(--transition-fast);
+  width: 240px;
+  
+  .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 0.5rem 1rem 0.5rem 2.25rem;
+    font-size: 0.8125rem;
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    outline: none;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+    
+    &:focus {
+      background-color: rgba(255, 255, 255, 0.04);
+      border-color: var(--border-focus);
+    }
+  }
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.375rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  outline: none;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
   
   &:hover {
-    background-color: var(--background);
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.03);
   }
   
+  .dot-indicator {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 6px;
+    height: 6px;
+    background-color: var(--error);
+    border-radius: 50%;
+  }
+}
+
+.user-profile-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--border-color);
+  
   .avatar {
-    width: 38px;
-    height: 38px;
-    background-color: var(--primary);
-    color: white;
-    font-size: 0.875rem;
-    font-weight: 700;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #27272a;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    box-shadow: var(--shadow-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #ffffff;
+    user-select: none;
   }
   
-  .user-info {
+  .user-details {
     display: flex;
     flex-direction: column;
     
-    @media (max-width: 600px) {
-      display: none;
+    .user-name {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .user-role {
+      font-size: 0.6875rem;
+      color: var(--text-secondary);
     }
   }
-  
-  .user-name {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  .topbar-container {
+    padding: 0 1rem;
   }
-  
-  .user-role {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    line-height: 1.2;
+  .search-box {
+    display: none;
+  }
+  .user-details {
+    display: none;
   }
 }

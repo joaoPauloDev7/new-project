@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -10,13 +11,33 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class CabecalhoComponent {
   private authService = inject(AuthService);
+  private router = inject(Router);
 
-  // Expose current user signal
   currentUser = this.authService.currentUser;
+
+  get breadcrumbs(): string[] {
+    const url = this.router.url.split('?')[0];
+    const segments = url.split('/').filter(s => !!s);
+    if (segments.length === 0) {
+      return ['Dashboard'];
+    }
+    
+    // Core routes Portuguese label mapping dictionary
+    const routeNames: { [key: string]: string } = {
+      'dashboard': 'Dashboard',
+      'products': 'Produtos',
+      'gallery': 'Galeria de Imagens',
+      'orders': 'Pedidos',
+      'customers': 'Clientes',
+      'settings': 'Configurações'
+    };
+
+    return segments.map(seg => routeNames[seg] || seg.charAt(0).toUpperCase() + seg.slice(1));
+  }
 
   getUserInitials(): string {
     const user = this.currentUser();
-    if (!user) return 'U';
+    if (!user) return 'AD';
     const names = user.name.trim().split(' ');
     if (names.length >= 2) {
       return (names[0][0] + names[1][0]).toUpperCase();

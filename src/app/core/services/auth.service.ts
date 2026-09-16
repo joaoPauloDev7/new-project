@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { LoginRequest, LoginResponse, User } from '../models/auth.models';
+import { LoginRequest, LoginResponse, RegisterRequest, User } from '../models/auth.models';
 
 @Injectable({
   providedIn: 'root'
@@ -55,6 +55,20 @@ export class AuthService {
     return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, credentials).pipe(
       tap((response) => this.saveSession(response))
     );
+  }
+
+  /**
+   * Sends Register request
+   */
+  register(userData: RegisterRequest): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}/auth/register`, userData);
+  }
+
+  /**
+   * Sends Forgot Password request
+   */
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}/auth/forgot-password`, { email });
   }
 
   /**
