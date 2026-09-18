@@ -13,11 +13,12 @@ export class MenuComponent {
 
   // Simplified core navigation items
   menuItems = [
-    { label: 'Dashboard', route: '/dashboard', icon: 'dashboard' },
-    { label: 'Produtos', route: '/products', icon: 'products' },
-    { label: 'Galeria', route: '/gallery', icon: 'gallery' },
-    { label: 'Pedidos', route: '/orders', icon: 'orders' },
-    { label: 'Clientes', route: '/customers', icon: 'customers' },
-    { label: 'Configurações', route: '/settings', icon: 'settings' }
+    { label: 'Dashboard', route: '/admin/dashboard', icon: 'dashboard' },
+    { label: 'Produtos', route: '/admin/products', icon: 'products' },
+    { label: 'Galeria', route: '/admin/gallery', icon: 'gallery' },
+    { label: 'Pedidos', route: '/admin/orders', icon: 'orders' },
+    { label: 'Estoque', route: '/admin/stock', icon: 'stock' },
+    { label: 'Clientes', route: '/admin/customers', icon: 'customers' },
+    { label: 'Configurações', route: '/admin/settings', icon: 'settings' }
   ];
 }

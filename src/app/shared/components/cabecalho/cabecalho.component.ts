@@ -17,7 +17,7 @@ export class CabecalhoComponent {
 
   get breadcrumbs(): string[] {
     const url = this.router.url.split('?')[0];
-    const segments = url.split('/').filter(s => !!s);
+    const segments = url.split('/').filter(s => !!s && s !== 'admin');
     if (segments.length === 0) {
       return ['Dashboard'];
     }
@@ -28,6 +28,7 @@ export class CabecalhoComponent {
       'products': 'Produtos',
       'gallery': 'Galeria de Imagens',
       'orders': 'Pedidos',
+      'stock': 'Estoque',
       'customers': 'Clientes',
       'settings': 'Configurações'
     };
