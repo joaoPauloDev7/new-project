@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { PLATFORM_ID } from '@angular/core';
+import { PLATFORM_ID, provideZonelessChangeDetection } from '@angular/core';
 import { WhatsappService } from './whatsapp.service';
 import { CartItem, Product } from '../models/store.models';
 import { STORE_CONFIG } from '../config/store.config';
@@ -33,6 +33,7 @@ describe('WhatsappService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        provideZonelessChangeDetection(),
         WhatsappService,
         { provide: PLATFORM_ID, useValue: 'browser' }
       ]

@@ -1,23 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-
-interface Product {
-  id: string;
-  name: string;
-  sku: string;
-  description: string;
-  price: number;
-  pricePromo?: number | null;
-  stock: number;
-  status: boolean;
-  sizes: string[];
-  colors: string[];
-  gender: string;
-  highlight: boolean;
-  newLaunch: boolean;
-  images: { url: string; isMain: boolean }[];
-  createdAt: string;
-}
+import { AdminCategory, AdminProduct, AdminProductsService } from '../../../../core/services/admin-products.service';
 
 @Component({
   selector: 'app-products-page',
@@ -26,68 +9,39 @@ interface Product {
   templateUrl: './products-page.component.html',
   styleUrl: './products-page.component.scss'
 })
-export class ProductsPageComponent {
+export class ProductsPageComponent implements OnInit {
   private fb = inject(FormBuilder);
+  private adminProductsService = inject(AdminProductsService);
 
   showModal = signal<boolean>(false);
   dragOver = signal<boolean>(false);
+  isLoading = signal<boolean>(true);
+  isSubmitting = signal<boolean>(false);
+  errorMessage = signal<string | null>(null);
+  feedbackMessage = signal<{ text: string; type: 'success' | 'error' } | null>(null);
   
-  // List of active clothing products configuration for Barone Imports
-  products = signal<Product[]>([
-    {
-      id: '1',
-      name: 'Camiseta Pima Premium Black',
-      sku: 'BI-TSH-001',
-      description: 'Camiseta confeccionada em algodão Pima peruano, corte slim fit.',
-      price: 129.90,
-      pricePromo: 99.90,
-      stock: 45,
-      status: true,
-      sizes: ['M', 'G', 'GG'],
-      colors: ['Preto'],
-      gender: 'Masculino',
-      highlight: true,
-      newLaunch: false,
-      images: [{ url: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=200', isMain: true }],
-      createdAt: '2026-07-01'
-    },
-    {
-      id: '2',
-      name: 'Calça Chino Slim Gray',
-      sku: 'BI-PAN-002',
-      description: 'Calça chino slim fit em sarja leve com elastano.',
-      price: 249.90,
-      pricePromo: null,
-      stock: 12,
-      status: true,
-      sizes: ['38', '40', '42'],
-      colors: ['Cinza'],
-      gender: 'Masculino',
-      highlight: false,
-      newLaunch: true,
-      images: [{ url: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=200', isMain: true }],
-      createdAt: '2026-07-02'
-    },
-    {
-      id: '3',
-      name: 'Jaqueta Bomber Couro Eclipse',
-      sku: 'BI-JAC-003',
-      description: 'Jaqueta bomber em couro legítimo preto fosco com forro acolchoado.',
-      price: 1290.00,
-      pricePromo: null,
-      stock: 3,
-      status: true,
-      sizes: ['G', 'GG'],
-      colors: ['Preto'],
-      gender: 'Masculino',
-      highlight: true,
-      newLaunch: true,
-      images: [{ url: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=200', isMain: true }],
-      createdAt: '2026-07-05'
-    }
-  ]);
+  // Real products and categories from API
+  products = signal<AdminProduct[]>([]);
+  categories = signal<AdminCategory[]>([]);
+  
+  // Search filter
+  searchTerm = signal<string>('');
 
-  uploadedImages = signal<{ url: string; isMain: boolean }[]>([]);
+  // Editing state
+  editingProductId = signal<string | null>(null);
+
+  // Filtered products list
+  filteredProducts = computed(() => {
+    const term = this.searchTerm().toLowerCase().trim();
+    if (!term) return this.products();
+    return this.products().filter(p =>
+      p.name.toLowerCase().includes(term) ||
+      p.sku.toLowerCase().includes(term) ||
+      (p.category && p.category.name.toLowerCase().includes(term))
+    );
+  });
+
+  uploadedImages = signal<{ url: string; isMain: boolean; order?: number }[]>([]);
 
   productForm: FormGroup = this.fb.group({
     name: ['', Validators.required],
@@ -96,21 +50,62 @@ export class ProductsPageComponent {
     price: [0, [Validators.required, Validators.min(0.01)]],
     pricePromo: [null],
     stock: [0, [Validators.required, Validators.min(0)]],
+    categoryId: ['', Validators.required],
     status: [true],
     highlight: [false],
     newLaunch: [false],
     gender: ['Masculino', Validators.required],
+    composition: [''],
+    fit: [''],
+    washCare: [''],
     sizes: [[]],
     colors: [[]]
   });
 
   // Size selections
-  availableSizes = ['PP', 'P', 'M', 'G', 'GG', 'XG'];
+  availableSizes = ['PP', 'P', 'M', 'G', 'GG', 'XG', '38', '40', '42', '44', '46'];
   selectedSizes = signal<string[]>([]);
 
   // Color selections
-  availableColors = ['Preto', 'Branco', 'Cinza', 'Azul', 'Vermelho', 'Off-White', 'Bege'];
+  availableColors = ['Preto', 'Branco', 'Cinza', 'Azul', 'Off-White', 'Bege', 'Verde Militar'];
   selectedColors = signal<string[]>([]);
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  loadData(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
+    // Carregar categorias
+    this.adminProductsService.getCategories().subscribe({
+      next: (cats) => {
+        this.categories.set(cats);
+      },
+      error: (err) => {
+        console.error('Erro ao carregar categorias:', err);
+      }
+    });
+
+    // Carregar produtos (incluindo inativos para o admin)
+    this.adminProductsService.getProducts(true).subscribe({
+      next: (prods) => {
+        this.products.set(prods);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao carregar produtos:', err);
+        this.errorMessage.set('Não foi possível conectar com o servidor da Barone Store. Verifique se a API está em execução.');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  onSearchInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.searchTerm.set(input.value);
+  }
 
   toggleSize(size: string): void {
     let current = [...this.selectedSizes()];
@@ -135,14 +130,27 @@ export class ProductsPageComponent {
   }
 
   openAddModal(): void {
+    this.editingProductId.set(null);
+    this.feedbackMessage.set(null);
+
+    // Default to first category if available
+    const defaultCatId = this.categories().length > 0 ? this.categories()[0].id : '';
+
     this.productForm.reset({
+      name: '',
+      description: '',
+      sku: '',
       price: 0,
       pricePromo: null,
       stock: 0,
+      categoryId: defaultCatId,
       status: true,
       highlight: false,
       newLaunch: false,
       gender: 'Masculino',
+      composition: '',
+      fit: '',
+      washCare: '',
       sizes: [],
       colors: []
     });
@@ -152,8 +160,54 @@ export class ProductsPageComponent {
     this.showModal.set(true);
   }
 
+  openEditModal(product: AdminProduct): void {
+    this.editingProductId.set(product.id);
+    this.feedbackMessage.set(null);
+
+    // Handle sizes
+    const rawSizes = Array.isArray(product.sizes) ? product.sizes : [];
+    this.selectedSizes.set(rawSizes);
+
+    // Handle colors
+    const rawColors = Array.isArray(product.colors)
+      ? product.colors.map(c => typeof c === 'string' ? c : c.name)
+      : [];
+    this.selectedColors.set(rawColors);
+
+    // Handle images
+    const rawImages = (product.images || []).map((img, idx) => ({
+      url: img.url,
+      isMain: img.isMain ?? idx === 0,
+      order: img.order ?? idx
+    }));
+    this.uploadedImages.set(rawImages);
+
+    this.productForm.reset({
+      name: product.name,
+      description: product.description || '',
+      sku: product.sku,
+      price: product.price,
+      pricePromo: product.promotionalPrice ?? product.pricePromo ?? null,
+      stock: product.stock,
+      categoryId: product.categoryId,
+      status: product.status,
+      highlight: product.highlight ?? false,
+      newLaunch: product.newLaunch ?? false,
+      gender: product.gender || 'Masculino',
+      composition: product.composition || '',
+      fit: product.fit || '',
+      washCare: product.washCare || '',
+      sizes: rawSizes,
+      colors: rawColors
+    });
+
+    this.showModal.set(true);
+  }
+
   closeModal(): void {
     this.showModal.set(false);
+    this.editingProductId.set(null);
+    this.isSubmitting.set(false);
   }
 
   // Image actions
@@ -194,7 +248,8 @@ export class ProductsPageComponent {
         const isMain = current.length === 0 && i === 0;
         current.push({
           url: e.target.result,
-          isMain
+          isMain,
+          order: current.length
         });
         this.uploadedImages.set([...current]);
       };
@@ -222,7 +277,6 @@ export class ProductsPageComponent {
     this.uploadedImages.set(current);
   }
 
-  // Image sorting (reordering)
   moveImageUp(index: number): void {
     if (index === 0) return;
     const current = [...this.uploadedImages()];
@@ -247,32 +301,96 @@ export class ProductsPageComponent {
       return;
     }
 
+    this.isSubmitting.set(true);
     const formVal = this.productForm.value;
-    const newProduct: Product = {
-      id: Date.now().toString(),
+
+    const payload: Partial<AdminProduct> = {
       name: formVal.name,
       sku: formVal.sku,
       description: formVal.description || '',
-      price: formVal.price,
-      pricePromo: formVal.pricePromo,
-      stock: formVal.stock,
-      status: formVal.status,
-      sizes: formVal.sizes || [],
-      colors: formVal.colors || [],
-      gender: formVal.gender,
-      highlight: formVal.highlight,
-      newLaunch: formVal.newLaunch,
-      images: this.uploadedImages().length > 0 ? this.uploadedImages() : [{ url: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=200', isMain: true }],
-      createdAt: new Date().toISOString().split('T')[0]
+      price: Number(formVal.price),
+      promotionalPrice: formVal.pricePromo ? Number(formVal.pricePromo) : null,
+      pricePromo: formVal.pricePromo ? Number(formVal.pricePromo) : null,
+      stock: Number(formVal.stock),
+      categoryId: formVal.categoryId,
+      status: formVal.status ?? true,
+      gender: formVal.gender || 'Masculino',
+      highlight: formVal.highlight ?? false,
+      newLaunch: formVal.newLaunch ?? false,
+      composition: formVal.composition || null,
+      fit: formVal.fit || null,
+      washCare: formVal.washCare || null,
+      sizes: this.selectedSizes(),
+      colors: this.selectedColors(),
+      images: this.uploadedImages().length > 0
+        ? this.uploadedImages()
+        : [{ url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1000&q=85', isMain: true, order: 0 }]
     };
 
-    this.products.set([newProduct, ...this.products()]);
-    this.closeModal();
+    const isEdit = !!this.editingProductId();
+    const action$ = isEdit
+      ? this.adminProductsService.updateProduct(this.editingProductId()!, payload)
+      : this.adminProductsService.createProduct(payload);
+
+    action$.subscribe({
+      next: (savedProduct) => {
+        this.isSubmitting.set(false);
+        this.closeModal();
+        this.showFeedback(
+          isEdit ? `Produto "${savedProduct.name}" atualizado com sucesso!` : `Produto "${savedProduct.name}" cadastrado com sucesso!`,
+          'success'
+        );
+        this.loadData();
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        console.error('Erro ao salvar produto:', err);
+        const errorMsg = err.error?.message || 'Erro ao processar produto. Verifique se o SKU já existe.';
+        this.showFeedback(errorMsg, 'error');
+      }
+    });
+  }
+
+  toggleProductStatus(product: AdminProduct): void {
+    this.adminProductsService.toggleProductStatus(product.id).subscribe({
+      next: (updated) => {
+        this.products.set(
+          this.products().map(p => p.id === updated.id ? { ...p, status: updated.status } : p)
+        );
+        this.showFeedback(
+          `Produto "${product.name}" agora está ${updated.status ? 'ATIVO' : 'INATIVO'}.`,
+          'success'
+        );
+      },
+      error: (err) => {
+        console.error('Erro ao alternar status do produto:', err);
+        this.showFeedback('Erro ao alternar status do produto.', 'error');
+      }
+    });
   }
 
   deleteProduct(id: string): void {
-    if (confirm('Tem certeza que deseja excluir este produto?')) {
-      this.products.set(this.products().filter(p => p.id !== id));
+    const prod = this.products().find(p => p.id === id);
+    const prodName = prod ? prod.name : 'este produto';
+
+    if (confirm(`Tem certeza que deseja excluir "${prodName}" permanentemente?`)) {
+      this.adminProductsService.deleteProduct(id).subscribe({
+        next: () => {
+          this.products.set(this.products().filter(p => p.id !== id));
+          this.showFeedback(`Produto "${prodName}" excluído com sucesso.`, 'success');
+        },
+        error: (err) => {
+          console.error('Erro ao excluir produto:', err);
+          this.showFeedback('Erro ao excluir produto.', 'error');
+        }
+      });
     }
+  }
+
+  private showFeedback(text: string, type: 'success' | 'error'): void {
+    this.feedbackMessage.set({ text, type });
+    setTimeout(() => {
+      this.feedbackMessage.set(null);
+    }, 4000);
   }
 }

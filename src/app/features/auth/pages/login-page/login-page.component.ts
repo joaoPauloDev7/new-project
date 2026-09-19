@@ -47,10 +47,16 @@ export class LoginPageComponent {
     const credentials = this.loginForm.value;
 
     this.authService.login(credentials).subscribe({
-      next: () => {
-        // Retrieve return URL from route parameters or default to '/'
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-        this.router.navigateByUrl(returnUrl);
+      next: (response) => {
+        const queryReturnUrl = this.route.snapshot.queryParams['returnUrl'];
+        let targetUrl = queryReturnUrl;
+
+        // Se não houver returnUrl específico ou se for a raiz '/', direciona ADMIN para o painel
+        if (!targetUrl || targetUrl === '/') {
+          targetUrl = response.user?.role === 'ADMIN' ? '/admin/products' : '/';
+        }
+
+        this.router.navigateByUrl(targetUrl);
         this.isLoading.set(false);
       },
       error: (err) => {

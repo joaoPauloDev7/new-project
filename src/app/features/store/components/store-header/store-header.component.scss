@@ -136,6 +136,31 @@
         color: var(--primary);
       }
     }
+
+    .header-admin-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      background-color: var(--primary);
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-decoration: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+
+      &:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+      }
+
+      svg {
+        stroke: #ffffff;
+      }
+    }
   }
 
   .cart-link {

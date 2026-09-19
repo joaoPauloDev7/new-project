@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { StoreService } from './store.service';
 
 describe('StoreService', () => {
@@ -6,9 +7,13 @@ describe('StoreService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [StoreService]
+      providers: [
+        provideZonelessChangeDetection(),
+        StoreService
+      ]
     });
     service = TestBed.inject(StoreService);
+    service.initWithMockData();
   });
 
   it('deve retornar lista de produtos e categorias mockados', () => {

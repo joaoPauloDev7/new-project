@@ -68,23 +68,25 @@ export class ProductPageComponent implements OnInit {
 
   ngOnInit() {
     this.route.params.subscribe(params => {
-      const product = this.storeService.getProductById(params['id']);
-      if (product) {
-        this.product.set(product);
-        this.selectedImage.set(0);
-        this.selectedSize.set(null);
-        this.selectedColor.set(null);
-        this.quantity.set(1);
-        this.attemptedSubmit.set(false);
-        this.showAddedToast.set(false);
+      const idOrSlug = params['id'];
+      this.storeService.getProduct(idOrSlug).subscribe(product => {
+        if (product) {
+          this.product.set(product);
+          this.selectedImage.set(0);
+          this.selectedSize.set(null);
+          this.selectedColor.set(null);
+          this.quantity.set(1);
+          this.attemptedSubmit.set(false);
+          this.showAddedToast.set(false);
 
-        // SEO dinâmico
-        this.seoService.setPageMeta(
-          product.name,
-          `${product.description.slice(0, 155)}... Compre com atendimento exclusivo Barone Store.`,
-          product.images[0]
-        );
-      }
+          // SEO dinâmico com dados reais
+          this.seoService.setPageMeta(
+            product.name,
+            `${product.description ? product.description.slice(0, 155) : product.name}... Compre com atendimento exclusivo Barone Store.`,
+            product.images && product.images.length > 0 ? product.images[0] : undefined
+          );
+        }
+      });
     });
   }
 

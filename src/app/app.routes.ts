@@ -15,6 +15,7 @@ import { ForgotPasswordPageComponent } from './features/auth/pages/forgot-passwo
 
 import { DashboardPageComponent } from './features/dashboard/pages/dashboard-page/dashboard-page.component';
 import { ProductsPageComponent } from './features/products/pages/products-page/products-page.component';
+import { CategoriesPageComponent } from './features/categories/pages/categories-page/categories-page.component';
 import { OrdersPageComponent } from './features/orders/pages/orders-page/orders-page.component';
 import { CustomersPageComponent } from './features/customers/pages/customers-page/customers-page.component';
 import { GalleryPageComponent } from './features/gallery/pages/gallery-page/gallery-page.component';
@@ -48,9 +49,10 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: DashboardPageComponent },
+      { path: '', redirectTo: 'products', pathMatch: 'full' },
       { path: 'products', component: ProductsPageComponent },
+      { path: 'categories', component: CategoriesPageComponent },
+      { path: 'dashboard', component: DashboardPageComponent },
       { path: 'gallery', component: GalleryPageComponent },
       { path: 'orders', component: OrdersPageComponent },
       { path: 'stock', component: StockPageComponent },

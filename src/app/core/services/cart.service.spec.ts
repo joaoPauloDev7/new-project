@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { PLATFORM_ID } from '@angular/core';
+import { PLATFORM_ID, provideZonelessChangeDetection } from '@angular/core';
 import { CartService } from './cart.service';
 import { Product } from '../models/store.models';
 
@@ -33,6 +33,7 @@ describe('CartService', () => {
     localStorage.clear();
     TestBed.configureTestingModule({
       providers: [
+        provideZonelessChangeDetection(),
         CartService,
         { provide: PLATFORM_ID, useValue: 'browser' }
       ]
@@ -46,7 +47,7 @@ describe('CartService', () => {
   });
 
   it('deve inicializar com carrinho vazio', () => {
-    expect(service.items()).toEqual([]);
+    expect(service.cartItems()).toEqual([]);
     expect(service.totalItems()).toBe(0);
     expect(service.subtotal()).toBe(0);
     expect(service.isEmpty()).toBeTrue();
@@ -56,8 +57,8 @@ describe('CartService', () => {
     service.addItem(mockProductA, 1, 'M', 'Preto');
     expect(service.totalItems()).toBe(1);
     expect(service.subtotal()).toBe(100.0);
-    expect(service.items()[0].size).toBe('M');
-    expect(service.items()[0].color).toBe('Preto');
+    expect(service.cartItems()[0].size).toBe('M');
+    expect(service.cartItems()[0].color).toBe('Preto');
     expect(service.isEmpty()).toBeFalse();
   });
 
@@ -65,8 +66,8 @@ describe('CartService', () => {
     service.addItem(mockProductA, 1, 'M', 'Preto');
     service.addItem(mockProductA, 2, 'M', 'Preto');
 
-    expect(service.items().length).toBe(1);
-    expect(service.items()[0].quantity).toBe(3);
+    expect(service.cartItems().length).toBe(1);
+    expect(service.cartItems()[0].quantity).toBe(3);
     expect(service.totalItems()).toBe(3);
     expect(service.subtotal()).toBe(300.0);
   });
@@ -75,7 +76,7 @@ describe('CartService', () => {
     service.addItem(mockProductA, 1, 'M', 'Preto');
     service.addItem(mockProductA, 1, 'G', 'Preto');
 
-    expect(service.items().length).toBe(2);
+    expect(service.cartItems().length).toBe(2);
     expect(service.totalItems()).toBe(2);
     expect(service.subtotal()).toBe(200.0);
   });
@@ -90,7 +91,7 @@ describe('CartService', () => {
     service.addItem(mockProductA, 1, 'M', 'Preto');
     service.updateQuantity(mockProductA.id, 5, 'M', 'Preto');
 
-    expect(service.items()[0].quantity).toBe(5);
+    expect(service.cartItems()[0].quantity).toBe(5);
     expect(service.subtotal()).toBe(500.0);
   });
 
@@ -98,7 +99,7 @@ describe('CartService', () => {
     service.addItem(mockProductA, 2, 'M', 'Preto');
     service.updateQuantity(mockProductA.id, 0, 'M', 'Preto');
 
-    expect(service.items().length).toBe(0);
+    expect(service.cartItems().length).toBe(0);
     expect(service.isEmpty()).toBeTrue();
   });
 
@@ -108,8 +109,8 @@ describe('CartService', () => {
 
     service.removeItem(mockProductA.id, 'M', 'Preto');
 
-    expect(service.items().length).toBe(1);
-    expect(service.items()[0].product.id).toBe(mockProductB.id);
+    expect(service.cartItems().length).toBe(1);
+    expect(service.cartItems()[0].product.id).toBe(mockProductB.id);
   });
 
   it('deve limpar completamente o carrinho', () => {
@@ -118,7 +119,7 @@ describe('CartService', () => {
 
     service.clearCart();
 
-    expect(service.items()).toEqual([]);
+    expect(service.cartItems()).toEqual([]);
     expect(service.totalItems()).toBe(0);
     expect(service.subtotal()).toBe(0);
     expect(service.isEmpty()).toBeTrue();
@@ -128,8 +129,8 @@ describe('CartService', () => {
     service.addItem(mockProductA, 2, 'P', 'Branco');
 
     // Instancia novo serviço para testar hidratação do localStorage
-    const newService = new CartService('browser');
+    const newService = TestBed.runInInjectionContext(() => new CartService());
     expect(newService.totalItems()).toBe(2);
-    expect(newService.items()[0].product.name).toBe('Camiseta Teste A');
+    expect(newService.cartItems()[0].product.name).toBe('Camiseta Teste A');
   });
 });

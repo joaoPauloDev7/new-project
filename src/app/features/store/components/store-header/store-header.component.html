@@ -42,6 +42,19 @@
         <span>Atendimento</span>
       </a>
 
+      <!-- Admin Dashboard Link (when authenticated as ADMIN) -->
+      @if (authService.isAuthenticated() && authService.currentUser()?.role === 'ADMIN') {
+        <a routerLink="/admin/products" class="header-admin-link" title="Painel Administrativo" (click)="closeMobileMenu()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          <span>Admin</span>
+        </a>
+      }
+
       <!-- Cart Button with luxury bag icon and badge -->
       <a routerLink="/carrinho" class="cart-link" aria-label="Ver sacola de compras" (click)="closeMobileMenu()">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -87,6 +100,12 @@
             <span class="mobile-cart-badge">{{ cartService.totalItems() }} itens</span>
           }
         </a>
+        @if (authService.isAuthenticated() && authService.currentUser()?.role === 'ADMIN') {
+          <div class="mobile-nav-divider"></div>
+          <a routerLink="/admin/products" (click)="closeMobileMenu()" class="mobile-admin-link">
+            ⚙️ Painel Administrativo
+          </a>
+        }
       </nav>
 
       <div class="mobile-drawer-footer">

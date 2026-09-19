@@ -2,7 +2,7 @@
   <div class="products-header">
     <div>
       <h1>Gerenciamento de Produtos</h1>
-      <p class="subtitle">Cadastre, edite e organize a vitrine da Barone Imports.</p>
+      <p class="subtitle">Cadastre, edite e organize a vitrine da Barone Store.</p>
     </div>
     <button class="add-btn" (click)="openAddModal()">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -13,6 +13,22 @@
     </button>
   </div>
 
+  <!-- Feedback Banner -->
+  @if (feedbackMessage(); as msg) {
+    <div class="feedback-banner" [class.success]="msg.type === 'success'" [class.error]="msg.type === 'error'">
+      <span>{{ msg.text }}</span>
+      <button type="button" class="close-banner" (click)="feedbackMessage.set(null)">×</button>
+    </div>
+  }
+
+  <!-- Error Banner -->
+  @if (errorMessage(); as err) {
+    <div class="feedback-banner error">
+      <span>{{ err }}</span>
+      <button type="button" class="retry-btn" (click)="loadData()">Tentar Novamente</button>
+    </div>
+  }
+
   <!-- Filters -->
   <div class="control-bar">
     <div class="search-box">
@@ -20,7 +36,13 @@
         <circle cx="11" cy="11" r="8"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
-      <input type="text" placeholder="Filtrar por nome ou SKU..." class="search-input" />
+      <input
+        type="text"
+        placeholder="Filtrar por nome, SKU ou categoria..."
+        class="search-input"
+        [value]="searchTerm()"
+        (input)="onSearchInput($event)"
+      />
     </div>
   </div>
 
@@ -31,82 +53,103 @@
         <tr>
           <th>Item</th>
           <th>SKU</th>
+          <th>Categoria</th>
           <th class="num-col">Preço</th>
           <th class="num-col">Preço Promo</th>
           <th class="num-col">Estoque</th>
-          <th>Cores</th>
-          <th>Tamanhos</th>
           <th>Status</th>
           <th class="action-col">Ações</th>
         </tr>
       </thead>
       <tbody>
-        @for (prod of products(); track prod.id) {
+        @if (isLoading()) {
           <tr>
-            <td>
-              <div class="item-detail">
-                <img [src]="prod.images[0].url" [alt]="prod.name" class="item-thumb" />
-                <div class="item-text">
-                  <span class="item-name">{{ prod.name }}</span>
-                  <span class="item-gender-badge">{{ prod.gender }}</span>
+            <td colspan="8" class="empty-row">Carregando catálogo de produtos da Barone Store...</td>
+          </tr>
+        } @else {
+          @for (prod of filteredProducts(); track prod.id) {
+            <tr>
+              <td>
+                <div class="item-detail">
+                  <img
+                    [src]="prod.images && prod.images.length > 0 ? prod.images[0].url : 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200'"
+                    [alt]="prod.name"
+                    class="item-thumb"
+                  />
+                  <div class="item-text">
+                    <span class="item-name">{{ prod.name }}</span>
+                    <span class="item-gender-badge">{{ prod.gender || 'Masculino' }}</span>
+                  </div>
                 </div>
-              </div>
-            </td>
-            <td><code class="sku-code">{{ prod.sku }}</code></td>
-            <td class="num-col">R$ {{ prod.price.toFixed(2) }}</td>
-            <td class="num-col">
-              @if (prod.pricePromo) {
-                <span class="text-success">R$ {{ prod.pricePromo.toFixed(2) }}</span>
-              } @else {
-                <span class="text-muted">-</span>
-              }
-            </td>
-            <td class="num-col">
-              <span [class.text-danger]="prod.stock === 0" [class.text-success]="prod.stock > 10">
-                {{ prod.stock }} un
-              </span>
-            </td>
-            <td>{{ prod.colors.join(', ') || '-' }}</td>
-            <td>{{ prod.sizes.join(', ') || '-' }}</td>
-            <td>
-              @if (prod.status) {
-                <span class="badge badge-success">Ativo</span>
-              } @else {
-                <span class="badge badge-muted">Inativo</span>
-              }
-            </td>
-            <td class="action-col">
-              <div class="action-buttons">
-                <button class="row-btn" aria-label="Editar">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
+              </td>
+              <td><code class="sku-code">{{ prod.sku }}</code></td>
+              <td>
+                <span class="category-pill">{{ prod.category?.name || 'Geral' }}</span>
+              </td>
+              <td class="num-col">R$ {{ prod.price.toFixed(2) }}</td>
+              <td class="num-col">
+                @if (prod.promotionalPrice || prod.pricePromo) {
+                  <span class="text-success">R$ {{ (prod.promotionalPrice || prod.pricePromo)?.toFixed(2) }}</span>
+                } @else {
+                  <span class="text-muted">-</span>
+                }
+              </td>
+              <td class="num-col">
+                <span [class.text-danger]="prod.stock === 0" [class.text-success]="prod.stock > 10">
+                  {{ prod.stock }} un
+                </span>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="status-toggle-btn"
+                  [class.active]="prod.status"
+                  [class.inactive]="!prod.status"
+                  (click)="toggleProductStatus(prod)"
+                  title="Clique para alternar o status do produto"
+                >
+                  {{ prod.status ? 'Ativo' : 'Inativo' }}
                 </button>
-                <button class="row-btn delete-btn" (click)="deleteProduct(prod.id)" aria-label="Excluir">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
-                </button>
-              </div>
-            </td>
-          </tr>
-        } @empty {
-          <tr>
-            <td colspan="9" class="empty-row">Nenhum produto cadastrado.</td>
-          </tr>
+              </td>
+              <td class="action-col">
+                <div class="action-buttons">
+                  <button class="row-btn" (click)="openEditModal(prod)" aria-label="Editar" title="Editar Produto">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                  </button>
+                  <button class="row-btn delete-btn" (click)="deleteProduct(prod.id)" aria-label="Excluir" title="Excluir Produto">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="empty-row">
+                @if (searchTerm()) {
+                  Nenhum produto encontrado para "{{ searchTerm() }}".
+                } @else {
+                  Nenhum produto cadastrado no banco de dados. Clique em "Novo Produto" para cadastrar.
+                }
+              </td>
+            </tr>
+          }
         }
       </tbody>
     </table>
   </div>
 
-  <!-- Add Product Modal Overlay -->
+  <!-- Add/Edit Product Modal Overlay -->
   @if (showModal()) {
     <div class="modal-overlay animate-fade-in">
       <div class="modal-card">
         <div class="modal-header">
-          <h2>Cadastrar Novo Produto</h2>
+          <h2>{{ editingProductId() ? 'Editar Produto' : 'Cadastrar Novo Produto' }}</h2>
           <button class="close-modal-btn" (click)="closeModal()" aria-label="Fechar">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -121,18 +164,18 @@
             <div class="form-left-col">
               <div class="form-row">
                 <div class="form-group flex-1">
-                  <label class="form-label" for="prod-name">Nome do Produto</label>
+                  <label class="form-label" for="prod-name">Nome do Produto *</label>
                   <input id="prod-name" type="text" formControlName="name" class="form-input" placeholder="ex: Camiseta Pima Black" />
                 </div>
                 <div class="form-group flex-1">
-                  <label class="form-label" for="prod-sku">SKU</label>
-                  <input id="prod-sku" type="text" formControlName="sku" class="form-input" placeholder="ex: BI-TSH-001" />
+                  <label class="form-label" for="prod-sku">SKU *</label>
+                  <input id="prod-sku" type="text" formControlName="sku" class="form-input" placeholder="ex: BAR-CAM-001" />
                 </div>
               </div>
 
               <div class="form-row">
                 <div class="form-group flex-1">
-                  <label class="form-label" for="prod-price">Preço (R$)</label>
+                  <label class="form-label" for="prod-price">Preço (R$) *</label>
                   <input id="prod-price" type="number" formControlName="price" class="form-input" />
                 </div>
                 <div class="form-group flex-1">
@@ -143,9 +186,21 @@
 
               <div class="form-row">
                 <div class="form-group flex-1">
-                  <label class="form-label" for="prod-stock">Qtd em Estoque</label>
+                  <label class="form-label" for="prod-stock">Qtd em Estoque *</label>
                   <input id="prod-stock" type="number" formControlName="stock" class="form-input" />
                 </div>
+                <div class="form-group flex-1">
+                  <label class="form-label" for="prod-cat">Categoria *</label>
+                  <select id="prod-cat" formControlName="categoryId" class="form-input">
+                    <option value="" disabled>Selecione uma categoria...</option>
+                    @for (cat of categories(); track cat.id) {
+                      <option [value]="cat.id">{{ cat.name }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
                 <div class="form-group flex-1">
                   <label class="form-label" for="prod-gender">Gênero</label>
                   <select id="prod-gender" formControlName="gender" class="form-input">
@@ -153,6 +208,10 @@
                     <option value="Feminino">Feminino</option>
                     <option value="Unissex">Unissex</option>
                   </select>
+                </div>
+                <div class="form-group flex-1">
+                  <label class="form-label" for="prod-fit">Modelagem / Fit</label>
+                  <input id="prod-fit" type="text" formControlName="fit" class="form-input" placeholder="ex: Regular Tailored, Slim, Boxy" />
                 </div>
               </div>
 
@@ -206,6 +265,11 @@
               </div>
 
               <div class="form-group">
+                <label class="form-label" for="prod-comp">Composição do Tecido</label>
+                <input id="prod-comp" type="text" formControlName="composition" class="form-input" placeholder="ex: 100% Algodão Pima Peruano" />
+              </div>
+
+              <div class="form-group">
                 <label class="form-label" for="prod-desc">Descrição do Produto</label>
                 <textarea id="prod-desc" formControlName="description" rows="3" class="form-input textarea-input" placeholder="Detalhes técnicos, tecido, corte..."></textarea>
               </div>
@@ -237,7 +301,7 @@
                   <polyline points="21 15 16 10 5 21"></polyline>
                 </svg>
                 <p class="zone-text">Arraste as imagens aqui ou clique para upload.</p>
-                <span class="zone-info">PNG, JPG, WEBP (Max 5MB)</span>
+                <span class="zone-info">PNG, JPG, WEBP (URLs salvas no banco)</span>
               </div>
 
               <!-- Uploaded Previews -->
@@ -287,7 +351,9 @@
 
           <div class="modal-footer">
             <button type="button" class="cancel-btn" (click)="closeModal()">Cancelar</button>
-            <button type="submit" class="submit-btn" [disabled]="productForm.invalid">Salvar Produto</button>
+            <button type="submit" class="submit-btn" [disabled]="productForm.invalid || isSubmitting()">
+              {{ isSubmitting() ? 'Salvando...' : (editingProductId() ? 'Atualizar Produto' : 'Salvar Produto') }}
+            </button>
           </div>
         </form>
       </div>

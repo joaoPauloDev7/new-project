@@ -11,10 +11,15 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 export class MenuComponent {
   @Input() isCollapsed: boolean = false;
 
-  // Simplified core navigation items
+  // Visible menu items for Barone Store
   menuItems = [
-    { label: 'Dashboard', route: '/admin/dashboard', icon: 'dashboard' },
     { label: 'Produtos', route: '/admin/products', icon: 'products' },
+    { label: 'Categorias', route: '/admin/categories', icon: 'categories' },
+  ];
+
+  // Preserved for future projects (hidden in this project)
+  hiddenMenuItems = [
+    { label: 'Dashboard', route: '/admin/dashboard', icon: 'dashboard' },
     { label: 'Galeria', route: '/admin/gallery', icon: 'gallery' },
     { label: 'Pedidos', route: '/admin/orders', icon: 'orders' },
     { label: 'Estoque', route: '/admin/stock', icon: 'stock' },
