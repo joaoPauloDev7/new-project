@@ -368,7 +368,7 @@
               />
               <input 
                 type="file" 
-                #cameraInput 
+                #cameraFallbackInput 
                 (change)="onFileSelected($event)" 
                 accept="image/*" 
                 capture="environment" 
@@ -387,8 +387,8 @@
                   <button 
                     type="button" 
                     class="upload-btn upload-camera-btn" 
-                    (click)="$event.stopPropagation(); cameraInput.click()"
-                    title="Abrir a câmera do celular"
+                    (click)="$event.stopPropagation(); openCamera()"
+                    title="Abrir a câmera para fotografar o produto"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
@@ -470,6 +470,69 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  }
+
+  <!-- Live Camera Viewfinder Modal -->
+  @if (isCameraOpen()) {
+    <div class="camera-modal-backdrop" (click)="stopCamera()">
+      <div class="camera-card" (click)="$event.stopPropagation()">
+        <div class="camera-card-header">
+          <div class="camera-title-badge">
+            <span class="live-dot"></span>
+            <span>Câmera ao Vivo</span>
+          </div>
+          <button type="button" class="camera-close-action" (click)="stopCamera()" aria-label="Fechar câmera">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="camera-viewport">
+          <video #cameraVideo autoplay playsinline muted class="camera-feed"></video>
+          
+          <div class="camera-grid-overlay">
+            <div class="grid-line horizontal-top"></div>
+            <div class="grid-line horizontal-bottom"></div>
+            <div class="grid-line vertical-left"></div>
+            <div class="grid-line vertical-right"></div>
+          </div>
+
+          @if (isCameraLoading()) {
+            <div class="camera-connecting-state">
+              <div class="camera-spinner"></div>
+              <span>Iniciando câmera...</span>
+            </div>
+          }
+        </div>
+
+        <div class="camera-toolbar">
+          <!-- Flip Camera (Front / Back on mobile) -->
+          <button type="button" class="camera-tool-btn" (click)="flipCamera()" title="Alternar câmera frontal / traseira">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+            </svg>
+            <span>Trocar</span>
+          </button>
+
+          <!-- Main Shutter Button -->
+          <button type="button" class="camera-capture-trigger" (click)="capturePhoto()" title="Fotografar">
+            <div class="capture-inner-circle"></div>
+          </button>
+
+          <!-- Native Camera / Gallery Fallback -->
+          <button type="button" class="camera-tool-btn" (click)="triggerNativeCameraFallback()" title="Abrir app de câmera ou fotos">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <span>Arquivos</span>
+          </button>
+        </div>
       </div>
     </div>
   }

@@ -869,3 +869,230 @@
   }
 }
 
+/* Live Camera Modal Overlay */
+.camera-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(10px);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.camera-card {
+  width: 100%;
+  max-width: 520px;
+  background: #141416;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-2xl, 16px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  animation: modalScale 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.camera-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: #18181b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.camera-title-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #f4f4f5;
+
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #10b981;
+    box-shadow: 0 0 8px #10b981;
+    animation: livePulse 1.5s infinite;
+  }
+}
+
+@keyframes livePulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.camera-close-action {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.camera-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background-color: #09090b;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-feed {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+
+  .grid-line {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.15);
+
+    &.horizontal-top {
+      top: 33.33%;
+      left: 0;
+      right: 0;
+      height: 1px;
+    }
+
+    &.horizontal-bottom {
+      top: 66.66%;
+      left: 0;
+      right: 0;
+      height: 1px;
+    }
+
+    &.vertical-left {
+      left: 33.33%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+    }
+
+    &.vertical-right {
+      left: 66.66%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+    }
+  }
+}
+
+.camera-connecting-state {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(9, 9, 11, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: #e4e4e7;
+  font-size: 0.875rem;
+
+  .camera-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+.camera-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 1.25rem 1.5rem;
+  background: #18181b;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.camera-tool-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e4e4e7;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-width: 60px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+}
+
+.camera-capture-trigger {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: 4px solid #ffffff;
+  background: transparent;
+  padding: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+
+  .capture-inner-circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: #ffffff;
+    transition: transform var(--transition-fast), background-color var(--transition-fast);
+  }
+
+  &:hover {
+    transform: scale(1.05);
+
+    .capture-inner-circle {
+      background-color: #e4e4e7;
+    }
+  }
+
+  &:active {
+    transform: scale(0.94);
+
+    .capture-inner-circle {
+      transform: scale(0.9);
+      background-color: #d4d4d8;
+    }
+  }
+}
+

@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AdminCategory, AdminProduct, AdminProductsService } from '../../../../core/services/admin-products.service';
 
@@ -9,9 +9,17 @@ import { AdminCategory, AdminProduct, AdminProductsService } from '../../../../c
   templateUrl: './products-page.component.html',
   styleUrl: './products-page.component.scss'
 })
-export class ProductsPageComponent implements OnInit {
+export class ProductsPageComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private adminProductsService = inject(AdminProductsService);
+
+  @ViewChild('cameraVideo') cameraVideo?: ElementRef<HTMLVideoElement>;
+  @ViewChild('cameraFallbackInput') cameraFallbackInput?: ElementRef<HTMLInputElement>;
+
+  isCameraOpen = signal<boolean>(false);
+  isCameraLoading = signal<boolean>(false);
+  cameraFacingMode = signal<'environment' | 'user'>('environment');
+  private activeStream: MediaStream | null = null;
 
   showModal = signal<boolean>(false);
   dragOver = signal<boolean>(false);
@@ -330,10 +338,142 @@ export class ProductsPageComponent implements OnInit {
     this.showModal.set(true);
   }
 
+  ngOnDestroy(): void {
+    this.stopCamera();
+  }
+
   closeModal(): void {
+    this.stopCamera();
     this.showModal.set(false);
     this.editingProductId.set(null);
     this.isSubmitting.set(false);
+  }
+
+  // Camera Live Controller
+  async openCamera(): Promise<void> {
+    if (typeof window === 'undefined' || !navigator?.mediaDevices?.getUserMedia) {
+      this.cameraFallbackInput?.nativeElement?.click();
+      return;
+    }
+
+    this.isCameraOpen.set(true);
+    this.isCameraLoading.set(true);
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: this.cameraFacingMode() },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        },
+        audio: false
+      });
+
+      this.activeStream = stream;
+      this.isCameraLoading.set(false);
+
+      setTimeout(() => {
+        if (this.cameraVideo?.nativeElement) {
+          this.cameraVideo.nativeElement.srcObject = stream;
+          this.cameraVideo.nativeElement.play().catch(e => console.warn('Camera play warning:', e));
+        }
+      }, 80);
+    } catch (err: any) {
+      console.warn('Camera getUserMedia error:', err);
+      this.isCameraLoading.set(false);
+      this.stopCamera();
+
+      const isNoDevice = err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError';
+      const msg = isNoDevice
+        ? 'Nenhuma câmera física detectada neste computador. Abrindo seletor de arquivos...'
+        : 'Permissão de câmera não concedida. Abrindo seletor de arquivos...';
+
+      this.feedbackMessage.set({ text: msg, type: 'error' });
+      setTimeout(() => this.feedbackMessage.set(null), 4000);
+
+      setTimeout(() => {
+        this.cameraFallbackInput?.nativeElement?.click();
+      }, 400);
+    }
+  }
+
+  async flipCamera(): Promise<void> {
+    const nextMode = this.cameraFacingMode() === 'environment' ? 'user' : 'environment';
+    this.cameraFacingMode.set(nextMode);
+
+    if (this.activeStream) {
+      this.activeStream.getTracks().forEach(t => t.stop());
+      this.activeStream = null;
+    }
+
+    this.isCameraLoading.set(true);
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: nextMode }
+        },
+        audio: false
+      });
+
+      this.activeStream = stream;
+      this.isCameraLoading.set(false);
+
+      if (this.cameraVideo?.nativeElement) {
+        this.cameraVideo.nativeElement.srcObject = stream;
+        this.cameraVideo.nativeElement.play().catch(e => console.warn(e));
+      }
+    } catch (err) {
+      console.warn('flipCamera error:', err);
+      this.isCameraLoading.set(false);
+    }
+  }
+
+  capturePhoto(): void {
+    if (!this.cameraVideo?.nativeElement) return;
+    const video = this.cameraVideo.nativeElement;
+    
+    const width = video.videoWidth || 1280;
+    const height = video.videoHeight || 720;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, width, height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+
+      const current = this.uploadedImages();
+      this.uploadedImages.set([
+        ...current,
+        {
+          url: dataUrl,
+          isMain: current.length === 0,
+          order: current.length
+        }
+      ]);
+
+      this.feedbackMessage.set({ text: 'Foto capturada com sucesso!', type: 'success' });
+      setTimeout(() => this.feedbackMessage.set(null), 3000);
+      
+      this.stopCamera();
+    }
+  }
+
+  triggerNativeCameraFallback(): void {
+    this.stopCamera();
+    this.cameraFallbackInput?.nativeElement?.click();
+  }
+
+  stopCamera(): void {
+    if (this.activeStream) {
+      this.activeStream.getTracks().forEach(t => t.stop());
+      this.activeStream = null;
+    }
+    this.isCameraOpen.set(false);
+    this.isCameraLoading.set(false);
   }
 
   // Image actions
