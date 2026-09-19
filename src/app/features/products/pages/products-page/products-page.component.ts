@@ -64,11 +64,23 @@ export class ProductsPageComponent implements OnInit {
 
   // Size selections
   availableSizes = ['PP', 'P', 'M', 'G', 'GG', 'XG', '38', '40', '42', '44', '46'];
+  customSizes = signal<string[]>([]);
   selectedSizes = signal<string[]>([]);
+  showCustomSizeInput = signal<boolean>(false);
+
+  allSizes = computed(() => {
+    return Array.from(new Set([...this.availableSizes, ...this.customSizes()]));
+  });
 
   // Color selections
   availableColors = ['Preto', 'Branco', 'Cinza', 'Azul', 'Off-White', 'Bege', 'Verde Militar'];
+  customColors = signal<string[]>([]);
   selectedColors = signal<string[]>([]);
+  showCustomColorInput = signal<boolean>(false);
+
+  allColors = computed(() => {
+    return Array.from(new Set([...this.availableColors, ...this.customColors()]));
+  });
 
   ngOnInit(): void {
     this.loadData();
@@ -129,6 +141,109 @@ export class ProductsPageComponent implements OnInit {
     this.productForm.get('colors')?.setValue(current);
   }
 
+  // Custom Sizes Tagging
+  toggleCustomSizeInput(): void {
+    this.showCustomSizeInput.update(v => !v);
+  }
+
+  addCustomSizeFromInput(inputElement: HTMLInputElement): void {
+    const raw = inputElement.value;
+    if (!raw.trim()) return;
+
+    const tokens = raw
+      .split(/[\s,;]+/)
+      .map(t => t.trim().toUpperCase())
+      .filter(t => t.length > 0);
+
+    if (tokens.length > 0) {
+      const newCustoms = [...this.customSizes()];
+      const newSelected = [...this.selectedSizes()];
+
+      tokens.forEach(tok => {
+        if (!newCustoms.includes(tok) && !this.availableSizes.includes(tok)) {
+          newCustoms.push(tok);
+        }
+        if (!newSelected.includes(tok)) {
+          newSelected.push(tok);
+        }
+      });
+
+      this.customSizes.set(newCustoms);
+      this.selectedSizes.set(newSelected);
+      this.productForm.get('sizes')?.setValue(newSelected);
+      inputElement.value = '';
+    }
+  }
+
+  onSizeInputKeydown(event: KeyboardEvent, inputElement: HTMLInputElement): void {
+    if (event.key === ' ' || event.key === 'Enter' || event.key === ',') {
+      event.preventDefault();
+      this.addCustomSizeFromInput(inputElement);
+    }
+  }
+
+  removeCustomSize(size: string, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.customSizes.update(list => list.filter(s => s !== size));
+    const newSelected = this.selectedSizes().filter(s => s !== size);
+    this.selectedSizes.set(newSelected);
+    this.productForm.get('sizes')?.setValue(newSelected);
+  }
+
+  // Custom Colors Tagging
+  toggleCustomColorInput(): void {
+    this.showCustomColorInput.update(v => !v);
+  }
+
+  addCustomColorFromInput(inputElement: HTMLInputElement): void {
+    const raw = inputElement.value;
+    if (!raw.trim()) return;
+
+    const tokens = raw
+      .split(/[\s,;]+/)
+      .map(t => t.trim())
+      .filter(t => t.length > 0);
+
+    if (tokens.length > 0) {
+      const newCustoms = [...this.customColors()];
+      const newSelected = [...this.selectedColors()];
+
+      tokens.forEach(tok => {
+        const formatted = tok.charAt(0).toUpperCase() + tok.slice(1);
+        if (!newCustoms.includes(formatted) && !this.availableColors.includes(formatted)) {
+          newCustoms.push(formatted);
+        }
+        if (!newSelected.includes(formatted)) {
+          newSelected.push(formatted);
+        }
+      });
+
+      this.customColors.set(newCustoms);
+      this.selectedColors.set(newSelected);
+      this.productForm.get('colors')?.setValue(newSelected);
+      inputElement.value = '';
+    }
+  }
+
+  onColorInputKeydown(event: KeyboardEvent, inputElement: HTMLInputElement): void {
+    if (event.key === ' ' || event.key === 'Enter' || event.key === ',') {
+      event.preventDefault();
+      this.addCustomColorFromInput(inputElement);
+    }
+  }
+
+  removeCustomColor(color: string, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.customColors.update(list => list.filter(c => c !== color));
+    const newSelected = this.selectedColors().filter(c => c !== color);
+    this.selectedColors.set(newSelected);
+    this.productForm.get('colors')?.setValue(newSelected);
+  }
+
   openAddModal(): void {
     this.editingProductId.set(null);
     this.feedbackMessage.set(null);
@@ -156,6 +271,10 @@ export class ProductsPageComponent implements OnInit {
     });
     this.selectedSizes.set([]);
     this.selectedColors.set([]);
+    this.customSizes.set([]);
+    this.customColors.set([]);
+    this.showCustomSizeInput.set(false);
+    this.showCustomColorInput.set(false);
     this.uploadedImages.set([]);
     this.showModal.set(true);
   }
@@ -167,12 +286,19 @@ export class ProductsPageComponent implements OnInit {
     // Handle sizes
     const rawSizes = Array.isArray(product.sizes) ? product.sizes : [];
     this.selectedSizes.set(rawSizes);
+    const existingCustomSizes = rawSizes.filter(s => !this.availableSizes.includes(s));
+    this.customSizes.set(existingCustomSizes);
 
     // Handle colors
     const rawColors = Array.isArray(product.colors)
       ? product.colors.map(c => typeof c === 'string' ? c : c.name)
       : [];
     this.selectedColors.set(rawColors);
+    const existingCustomColors = rawColors.filter(c => !this.availableColors.includes(c));
+    this.customColors.set(existingCustomColors);
+
+    this.showCustomSizeInput.set(false);
+    this.showCustomColorInput.set(false);
 
     // Handle images
     const rawImages = (product.images || []).map((img, idx) => ({
@@ -232,30 +358,29 @@ export class ProductsPageComponent implements OnInit {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files) {
+    if (input.files && input.files.length > 0) {
       this.handleFiles(input.files);
     }
+    input.value = '';
   }
 
   private handleFiles(files: FileList): void {
-    const current = [...this.uploadedImages()];
-    
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    Array.from(files).forEach((file) => {
       const reader = new FileReader();
-      
       reader.onload = (e: any) => {
-        const isMain = current.length === 0 && i === 0;
-        current.push({
-          url: e.target.result,
-          isMain,
-          order: current.length
-        });
-        this.uploadedImages.set([...current]);
+        const current = this.uploadedImages();
+        const isMain = current.length === 0;
+        this.uploadedImages.set([
+          ...current,
+          {
+            url: e.target.result,
+            isMain,
+            order: current.length
+          }
+        ]);
       };
-      
       reader.readAsDataURL(file);
-    }
+    });
   }
 
   removeImage(index: number): void {

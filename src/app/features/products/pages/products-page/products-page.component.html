@@ -232,7 +232,17 @@
 
               <!-- Sizing Grid -->
               <div class="form-group">
-                <span class="form-label">Tamanhos Disponíveis</span>
+                <div class="field-label-row">
+                  <span class="form-label">Tamanhos Disponíveis</span>
+                  <button 
+                    type="button" 
+                    class="other-toggle-link" 
+                    (click)="toggleCustomSizeInput()"
+                  >
+                    {{ showCustomSizeInput() ? 'Fechar Outros' : '+ Outros' }}
+                  </button>
+                </div>
+
                 <div class="sizes-selector-grid">
                   @for (sz of availableSizes; track sz) {
                     <button 
@@ -244,12 +254,51 @@
                       {{ sz }}
                     </button>
                   }
+
+                  <!-- Custom added sizes as clickable pill tags -->
+                  @for (sz of customSizes(); track sz) {
+                    <button 
+                      type="button" 
+                      class="size-pill-btn custom-tag-pill" 
+                      [class.selected]="selectedSizes().includes(sz)"
+                      (click)="toggleSize(sz)"
+                    >
+                      <span>{{ sz }}</span>
+                      <span class="remove-tag-icon" (click)="removeCustomSize(sz, $event)" title="Remover tamanho">×</span>
+                    </button>
+                  }
                 </div>
+
+                <!-- Custom Size Input Bar -->
+                @if (showCustomSizeInput()) {
+                  <div class="custom-tag-input-bar animate-fade-in">
+                    <input 
+                      #customSizeInput
+                      type="text" 
+                      class="tag-inline-input"
+                      placeholder="Digite o tamanho (espaço ou Enter para adicionar)..."
+                      (keydown)="onSizeInputKeydown($event, customSizeInput)"
+                    />
+                    <button type="button" class="btn-add-tag" (click)="addCustomSizeFromInput(customSizeInput)">
+                      + Adicionar
+                    </button>
+                  </div>
+                }
               </div>
 
               <!-- Colors Grid -->
               <div class="form-group">
-                <span class="form-label">Cores Disponíveis</span>
+                <div class="field-label-row">
+                  <span class="form-label">Cores Disponíveis</span>
+                  <button 
+                    type="button" 
+                    class="other-toggle-link" 
+                    (click)="toggleCustomColorInput()"
+                  >
+                    {{ showCustomColorInput() ? 'Fechar Outras' : '+ Outras' }}
+                  </button>
+                </div>
+
                 <div class="colors-selector-grid">
                   @for (col of availableColors; track col) {
                     <button 
@@ -261,7 +310,36 @@
                       {{ col }}
                     </button>
                   }
+
+                  <!-- Custom added colors as clickable pill tags -->
+                  @for (col of customColors(); track col) {
+                    <button 
+                      type="button" 
+                      class="color-pill-btn custom-tag-pill" 
+                      [class.selected]="selectedColors().includes(col)"
+                      (click)="toggleColor(col)"
+                    >
+                      <span>{{ col }}</span>
+                      <span class="remove-tag-icon" (click)="removeCustomColor(col, $event)" title="Remover cor">×</span>
+                    </button>
+                  }
                 </div>
+
+                <!-- Custom Color Input Bar -->
+                @if (showCustomColorInput()) {
+                  <div class="custom-tag-input-bar animate-fade-in">
+                    <input 
+                      #customColorInput
+                      type="text" 
+                      class="tag-inline-input"
+                      placeholder="Digite a cor (espaço ou Enter para adicionar)..."
+                      (keydown)="onColorInputKeydown($event, customColorInput)"
+                    />
+                    <button type="button" class="btn-add-tag" (click)="addCustomColorFromInput(customColorInput)">
+                      + Adicionar
+                    </button>
+                  </div>
+                }
               </div>
 
               <div class="form-group">
@@ -279,6 +357,24 @@
             <div class="form-right-col">
               <span class="form-label">Fotos do Produto</span>
               
+              <!-- Hidden Inputs for Gallery / Files & Camera Capture -->
+              <input 
+                type="file" 
+                #fileInput 
+                (change)="onFileSelected($event)" 
+                multiple 
+                accept="image/*" 
+                style="display: none;" 
+              />
+              <input 
+                type="file" 
+                #cameraInput 
+                (change)="onFileSelected($event)" 
+                accept="image/*" 
+                capture="environment" 
+                style="display: none;" 
+              />
+
               <div 
                 class="drag-drop-zone"
                 [class.drag-over]="dragOver()"
@@ -287,21 +383,39 @@
                 (drop)="onDrop($event)"
                 (click)="fileInput.click()"
               >
-                <input 
-                  type="file" 
-                  #fileInput 
-                  (change)="onFileSelected($event)" 
-                  multiple 
-                  accept="image/*" 
-                  style="display: none;" 
-                />
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                  <polyline points="21 15 16 10 5 21"></polyline>
-                </svg>
-                <p class="zone-text">Arraste as imagens aqui ou clique para upload.</p>
-                <span class="zone-info">PNG, JPG, WEBP (URLs salvas no banco)</span>
+                <div class="upload-buttons-group">
+                  <button 
+                    type="button" 
+                    class="upload-btn upload-camera-btn" 
+                    (click)="$event.stopPropagation(); cameraInput.click()"
+                    title="Abrir a câmera do celular"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                      <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    <span>Tirar Foto (Câmera)</span>
+                  </button>
+
+                  <button 
+                    type="button" 
+                    class="upload-btn upload-gallery-btn" 
+                    (click)="$event.stopPropagation(); fileInput.click()"
+                    title="Selecionar fotos da galeria ou computador"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                      <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    <span>Galeria / Arquivo</span>
+                  </button>
+                </div>
+
+                <div class="drag-text-container">
+                  <p class="zone-text">ou arraste suas imagens para esta área</p>
+                  <span class="zone-info">PNG, JPG, WEBP • Otimização automática</span>
+                </div>
               </div>
 
               <!-- Uploaded Previews -->
