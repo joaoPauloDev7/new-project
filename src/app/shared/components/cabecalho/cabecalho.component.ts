@@ -26,6 +26,7 @@ export class CabecalhoComponent {
     const routeNames: { [key: string]: string } = {
       'dashboard': 'Dashboard',
       'products': 'Produtos',
+      'categories': 'Categorias',
       'gallery': 'Galeria de Imagens',
       'orders': 'Pedidos',
       'stock': 'Estoque',
@@ -34,6 +35,11 @@ export class CabecalhoComponent {
     };
 
     return segments.map(seg => routeNames[seg] || seg.charAt(0).toUpperCase() + seg.slice(1));
+  }
+
+  get currentSection(): string {
+    const crumbs = this.breadcrumbs;
+    return crumbs.length > 0 ? crumbs[crumbs.length - 1] : 'Painel';
   }
 
   getUserInitials(): string {

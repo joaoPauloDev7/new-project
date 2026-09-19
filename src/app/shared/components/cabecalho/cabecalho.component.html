@@ -1,7 +1,7 @@
 <div class="topbar-container">
-  <!-- Left Side: Breadcrumbs -->
+  <!-- Left Side: Breadcrumbs (Desktop) & Brand Badge (Mobile) -->
   <div class="topbar-left">
-    <div class="breadcrumb-trail">
+    <div class="breadcrumb-trail desktop-only">
       <span class="breadcrumb-root">Barone Imports</span>
       @for (crumb of breadcrumbs; track crumb) {
         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="breadcrumb-separator">
@@ -9,6 +9,16 @@
         </svg>
         <span class="breadcrumb-current">{{ crumb }}</span>
       }
+    </div>
+
+    <div class="mobile-brand-bar">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="mobile-brand-icon">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+        <polyline points="2 17 12 22 22 17"></polyline>
+        <polyline points="2 12 12 17 22 12"></polyline>
+      </svg>
+      <span class="mobile-brand-name">BARONE</span>
+      <span class="mobile-section-badge">{{ currentSection }}</span>
     </div>
   </div>
 
@@ -23,19 +33,10 @@
       <input type="text" placeholder="Buscar no painel..." class="search-input" />
     </div>
 
-    <!-- Notifications -->
-    <button class="icon-btn" aria-label="Notificações">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-      </svg>
-      <span class="dot-indicator"></span>
-    </button>
-
     <!-- User Profile -->
     @if (currentUser()) {
       <div class="user-profile-wrapper">
-        <div class="avatar">
+        <div class="avatar" title="Administrador Logado">
           {{ getUserInitials() }}
         </div>
         <div class="user-details">

@@ -144,14 +144,61 @@
   }
 }
 
+.mobile-brand-bar {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .topbar-container {
+    height: 56px;
     padding: 0 1rem;
+    background-color: rgba(9, 9, 11, 0.95);
+    backdrop-filter: blur(12px);
   }
+
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-brand-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .mobile-brand-icon {
+      width: 18px;
+      height: 18px;
+      color: #ffffff;
+    }
+
+    .mobile-brand-name {
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #ffffff;
+    }
+
+    .mobile-section-badge {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: #a1a1aa;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.15rem 0.5rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  }
+
   .search-box {
     display: none;
   }
+
   .user-details {
     display: none;
+  }
+
+  .user-profile-wrapper {
+    padding-left: 0;
+    border-left: none;
   }
 }
