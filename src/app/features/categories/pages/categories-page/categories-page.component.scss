@@ -302,9 +302,9 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 1200;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -630,14 +630,51 @@
     font-size: 0.875rem;
   }
 
-  .modal-card {
-    max-height: 100vh;
-    height: 100vh;
-    border-radius: 0;
-    max-width: 100%;
+  .modal-overlay {
+    padding: 0 !important;
+    align-items: stretch !important;
+    z-index: 1200 !important;
   }
 
-  .modal-overlay {
-    padding: 0;
+  .modal-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    border: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .modal-header {
+    flex-shrink: 0;
+    padding: 1.15rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .modal-form {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 1.25rem 1.25rem calc(25px + env(safe-area-inset-bottom, 0px)) 1.25rem !important;
+  }
+
+  .modal-actions {
+    flex-shrink: 0;
+    padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom, 0px)) 1.25rem !important;
+    border-top: 1px solid var(--border-color);
+    background-color: #121214;
+    display: flex;
+    gap: 0.75rem;
+
+    .cancel-btn, .submit-btn {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      justify-content: center;
+      text-align: center;
+      font-size: 0.875rem;
+    }
   }
 }
