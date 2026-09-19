@@ -197,6 +197,7 @@
   .workspace-content {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     padding: 1rem 0.875rem calc(75px + env(safe-area-inset-bottom, 0px)) 0.875rem;
   }
