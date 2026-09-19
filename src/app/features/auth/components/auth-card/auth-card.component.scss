@@ -32,18 +32,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 48px;
-  height: 48px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 54px;
+  height: 54px;
   border-radius: var(--radius-lg);
   margin-bottom: 1.25rem;
-  box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
   
-  .logo-icon {
-    width: 24px;
-    height: 24px;
+  .auth-logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 }
 

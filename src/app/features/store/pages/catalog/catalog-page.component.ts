@@ -80,7 +80,7 @@ export class CatalogPageComponent implements OnInit {
       const catName = this.activeCategoryName();
       this.seoService.setPageMeta(
         catName === 'Todas as Peças' ? 'Catálogo & Coleção Completa' : `${catName} — Coleção`,
-        `Explore as peças de ${catName} da Barone Store. Alfaiataria e moda premium com estilo atemporal.`
+        `Explore as peças de ${catName} da Barone Store. Streetwear autêntico e modelagens exclusivas.`
       );
     });
   }

@@ -16,17 +16,21 @@
 
     <!-- Brand Logo -->
     <a routerLink="/" class="store-logo" (click)="closeMobileMenu()">
-      <span class="logo-main">BARONE</span>
-      <span class="logo-sub">STORE</span>
+      <img src="/images/logo.png" alt="Barone" class="store-logo-img" />
+      <div class="logo-text">
+        <span class="logo-main">BARONE</span>
+        <span class="logo-sub">IMPORTS</span>
+      </div>
     </a>
 
     <!-- Desktop Nav (Center) -->
     <nav class="desktop-nav" aria-label="Navegação primária">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Início</a>
-      <a routerLink="/catalogo" routerLinkActive="active">Coleção</a>
-      <a routerLink="/catalogo" [queryParams]="{categoria: 'camisetas'}">Camisetas</a>
-      <a routerLink="/catalogo" [queryParams]="{categoria: 'calcas'}">Calças</a>
-      <a routerLink="/catalogo" [queryParams]="{categoria: 'jaquetas'}">Jaquetas</a>
+      <a routerLink="/catalogo" routerLinkActive="active">Drops</a>
+      <a routerLink="/catalogo" [queryParams]="{categoria: 'camisetas'}">Camisetas Oversized</a>
+      <a routerLink="/catalogo" [queryParams]="{categoria: 'calcas'}">Calças Cargo</a>
+      <a routerLink="/catalogo" [queryParams]="{categoria: 'jaquetas'}">Hoodies & Jaquetas</a>
+      <a routerLink="/catalogo" [queryParams]="{categoria: 'acessorios'}">Acessórios</a>
     </nav>
 
     <!-- Actions (Right) -->
@@ -39,7 +43,7 @@
         class="header-contact-link"
         title="Falar com consultor pelo WhatsApp"
       >
-        <span>Atendimento</span>
+        <span>WhatsApp</span>
       </a>
 
       <!-- Admin Dashboard Link (when authenticated as ADMIN) -->
@@ -74,7 +78,10 @@
     <div class="mobile-overlay" (click)="closeMobileMenu()" aria-hidden="true"></div>
     <div class="mobile-drawer" role="dialog" aria-modal="true" aria-label="Navegação">
       <div class="drawer-header">
-        <span class="drawer-title">BARONE STORE</span>
+        <div class="drawer-brand">
+          <img src="/images/logo.png" alt="Barone" class="drawer-logo-img" />
+          <span class="drawer-title">BARONE IMPORTS</span>
+        </div>
         <button class="drawer-close-btn" (click)="closeMobileMenu()" aria-label="Fechar menu">
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"/>
@@ -85,14 +92,14 @@
 
       <nav class="mobile-nav">
         <a routerLink="/" (click)="closeMobileMenu()" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Início</a>
-        <a routerLink="/catalogo" (click)="closeMobileMenu()" routerLinkActive="active">Todas as Peças</a>
+        <a routerLink="/catalogo" (click)="closeMobileMenu()" routerLinkActive="active">Todos os Drops</a>
         <div class="mobile-nav-divider"></div>
-        <span class="mobile-nav-label">Categorias</span>
-        <a routerLink="/catalogo" [queryParams]="{categoria: 'camisetas'}" (click)="closeMobileMenu()">Camisetas Pima & Boxy</a>
-        <a routerLink="/catalogo" [queryParams]="{categoria: 'calcas'}" (click)="closeMobileMenu()">Calças Alfaiataria & Jogger</a>
-        <a routerLink="/catalogo" [queryParams]="{categoria: 'jaquetas'}" (click)="closeMobileMenu()">Jaquetas & Outerwear</a>
-        <a routerLink="/catalogo" [queryParams]="{categoria: 'shorts'}" (click)="closeMobileMenu()">Bermudas & Linho</a>
-        <a routerLink="/catalogo" [queryParams]="{categoria: 'acessorios'}" (click)="closeMobileMenu()">Acessórios em Couro</a>
+        <span class="mobile-nav-label">Categorias Street</span>
+        <a routerLink="/catalogo" [queryParams]="{categoria: 'camisetas'}" (click)="closeMobileMenu()">Camisetas Oversized & Boxy</a>
+        <a routerLink="/catalogo" [queryParams]="{categoria: 'calcas'}" (click)="closeMobileMenu()">Calças Cargo & Parachute</a>
+        <a routerLink="/catalogo" [queryParams]="{categoria: 'jaquetas'}" (click)="closeMobileMenu()">Hoodies & Jaquetas</a>
+        <a routerLink="/catalogo" [queryParams]="{categoria: 'shorts'}" (click)="closeMobileMenu()">Shorts & Bermudas Street</a>
+        <a routerLink="/catalogo" [queryParams]="{categoria: 'acessorios'}" (click)="closeMobileMenu()">Bags, Bonés & Acessórios</a>
         <div class="mobile-nav-divider"></div>
         <a routerLink="/carrinho" (click)="closeMobileMenu()" class="mobile-nav-cart">
           Sacola de Compras

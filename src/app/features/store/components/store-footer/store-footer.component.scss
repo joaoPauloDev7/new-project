@@ -22,14 +22,29 @@
   }
 
   .footer-brand {
+    .footer-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .footer-logo-img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+    }
+
     .footer-logo {
       display: block;
       text-transform: uppercase;
-      letter-spacing: 0.25em;
-      font-weight: 300;
-      font-size: 1.25rem;
+      letter-spacing: 0.22em;
+      font-weight: 700;
+      font-size: 1.15rem;
       color: var(--primary);
-      margin-bottom: 0.75rem;
     }
 
     .footer-tagline {

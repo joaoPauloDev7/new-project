@@ -25,8 +25,8 @@ export class HomePageComponent implements OnInit {
 
   ngOnInit(): void {
     this.seoService.setPageMeta(
-      'Coleção Permanente',
-      'Barone Store — Moda masculina premium, alfaiataria contemporânea e peças essenciais com caimento impecável.'
+      'Streetwear Masculino & Drops Exclusivos',
+      'Barone Imports — Moda de rua autêntica, modelagens oversized, tecidos heavyweight e drops exclusivos masculinos.'
     );
   }
 }

@@ -9,7 +9,7 @@ export const STORE_CONFIG = {
   name: 'Barone Store',
 
   /** Número do WhatsApp do vendedor (com código do país, sem + ou espaços) */
-  whatsappNumber: '5500000000000',
+  whatsappNumber: '5511963041542',
 
   /** Moeda utilizada */
   currency: 'BRL',

@@ -64,16 +64,18 @@
   gap: 0.75rem;
   color: #ffffff;
   
-  .brand-icon {
-    width: 22px;
-    height: 22px;
-    color: #ffffff;
+  .admin-brand-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
   
   .brand-text {
     font-size: 0.9375rem;
     font-weight: 700;
-    letter-spacing: -0.025em;
+    letter-spacing: 0.15em;
     user-select: none;
   }
 }
@@ -84,9 +86,12 @@
   justify-content: center;
   color: #ffffff;
   
-  .brand-icon {
-    width: 22px;
-    height: 22px;
+  .admin-brand-img-collapsed {
+    width: 28px;
+    height: 28px;
+    border-radius: 5px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 }
 

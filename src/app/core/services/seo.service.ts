@@ -15,7 +15,7 @@ export class SeoService {
   setPageMeta(title?: string, description?: string, ogImage?: string): void {
     const fullTitle = title 
       ? `${title} | ${STORE_CONFIG.name}` 
-      : `${STORE_CONFIG.name} — Moda Masculina & Alfaiataria Contemporânea`;
+      : `${STORE_CONFIG.name} — Streetwear & Drops Exclusivos`;
 
     this.titleService.setTitle(fullTitle);
 
