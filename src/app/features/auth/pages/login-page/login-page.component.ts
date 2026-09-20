@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -19,7 +19,7 @@ import { AuthButtonComponent } from '../../components/auth-button/auth-button.co
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.scss'
 })
-export class LoginPageComponent {
+export class LoginPageComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -28,12 +28,20 @@ export class LoginPageComponent {
   // States
   isLoading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
+  canRegister = signal<boolean>(false);
 
   // Form definition
   loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]]
   });
+
+  ngOnInit(): void {
+    this.authService.getRegistrationStatus().subscribe({
+      next: (res) => this.canRegister.set(res.registrationEnabled),
+      error: () => this.canRegister.set(false)
+    });
+  }
 
   onSubmit(): void {
     if (this.loginForm.invalid) {

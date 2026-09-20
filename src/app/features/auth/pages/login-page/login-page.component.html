@@ -47,7 +47,9 @@
     </app-auth-button>
   </form>
 
-  <div class="auth-footer">
-    <p>Não tem uma conta? <a routerLink="/register" class="signup-link">Criar uma conta</a></p>
-  </div>
+  @if (canRegister()) {
+    <div class="auth-footer">
+      <p>Não tem uma conta? <a routerLink="/register" class="signup-link">Criar uma conta</a></p>
+    </div>
+  }
 </app-auth-card>

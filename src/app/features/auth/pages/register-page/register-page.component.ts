@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -31,13 +31,15 @@ function matchPasswords(control: AbstractControl): ValidationErrors | null {
   templateUrl: './register-page.component.html',
   styleUrl: './register-page.component.scss'
 })
-export class RegisterPageComponent {
+export class RegisterPageComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
 
   // States
   isLoading = signal<boolean>(false);
+  isRegistrationChecking = signal<boolean>(true);
+  registrationEnabled = signal<boolean>(true);
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
 
@@ -75,6 +77,22 @@ export class RegisterPageComponent {
     }
   }
 
+  ngOnInit(): void {
+    this.authService.getRegistrationStatus().subscribe({
+      next: (res) => {
+        this.registrationEnabled.set(res.registrationEnabled);
+        this.isRegistrationChecking.set(false);
+      },
+      error: () => {
+        this.isRegistrationChecking.set(false);
+      }
+    });
+  }
+
+  goToLogin(): void {
+    this.router.navigate(['/login']);
+  }
+
   onSubmit(): void {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
@@ -97,7 +115,10 @@ export class RegisterPageComponent {
       },
       error: (err) => {
         this.isLoading.set(false);
-        if (err.status === 409) {
+        if (err.status === 403) {
+          this.registrationEnabled.set(false);
+          this.errorMessage.set(err.error?.message || 'O cadastro de novas contas está desativado. O sistema já possui um proprietário.');
+        } else if (err.status === 409) {
           this.errorMessage.set('Este e-mail já está cadastrado.');
         } else if (err.status === 0) {
           this.errorMessage.set('Não foi possível conectar ao servidor. Verifique sua conexão.');

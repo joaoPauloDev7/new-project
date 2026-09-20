@@ -58,6 +58,13 @@ export class AuthService {
   }
 
   /**
+   * Checks if registration is enabled (only allowed if 0 users exist)
+   */
+  getRegistrationStatus(): Observable<{ registrationEnabled: boolean; totalUsers: number }> {
+    return this.http.get<{ registrationEnabled: boolean; totalUsers: number }>(`${this.API_URL}/auth/registration-status`);
+  }
+
+  /**
    * Sends Register request
    */
   register(userData: RegisterRequest): Observable<any> {
