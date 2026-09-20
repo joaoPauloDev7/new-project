@@ -21,7 +21,8 @@ export class HomePageComponent implements OnInit {
   newProducts = this.storeService.newProducts;
 
   storeName = STORE_CONFIG.name;
-  whatsappLink = `https://wa.me/${STORE_CONFIG.whatsappNumber}`;
+  whatsappLink = `https://wa.me/${STORE_CONFIG.whatsappNumber}?text=${encodeURIComponent('Olá! Vim pelo site da Barone Imports e gostaria de conhecer os lançamentos.')}`;
+  whatsappSizingLink = `https://wa.me/${STORE_CONFIG.whatsappNumber}?text=${encodeURIComponent('Olá! Vim pelo site da Barone Imports e gostaria de tirar dúvidas sobre o tamanho e caimento das peças.')}`;
 
   ngOnInit(): void {
     this.seoService.setPageMeta(

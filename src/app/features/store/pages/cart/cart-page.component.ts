@@ -29,7 +29,7 @@ export class CartPageComponent implements OnInit {
   ngOnInit(): void {
     this.seoService.setPageMeta(
       'Sacola de Compras',
-      'Confira os itens selecionados na sua sacola de compras da Barone Store e finalize diretamente pelo WhatsApp.'
+      'Confira os itens selecionados na sua sacola de compras da Barone Imports e finalize diretamente pelo WhatsApp.'
     );
   }
 

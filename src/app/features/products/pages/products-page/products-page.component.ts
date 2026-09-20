@@ -116,7 +116,7 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Erro ao carregar produtos:', err);
-        this.errorMessage.set('Não foi possível conectar com o servidor da Barone Store. Verifique se a API está em execução.');
+        this.errorMessage.set('Não foi possível conectar com o servidor da Barone Imports. Verifique se a API está em execução.');
         this.isLoading.set(false);
       }
     });

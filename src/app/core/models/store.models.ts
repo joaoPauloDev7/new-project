@@ -1,5 +1,5 @@
 /**
- * Barone Store — Modelos da loja de moda premium.
+ * Barone Imports — Modelos da loja de moda premium.
  * Preparados para desacoplamento e integração transparente com API NestJS.
  */
 

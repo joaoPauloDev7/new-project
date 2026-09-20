@@ -11,7 +11,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 export class MenuComponent {
   @Input() isCollapsed: boolean = false;
 
-  // Visible menu items for Barone Store
+  // Visible menu items for Barone Imports
   menuItems = [
     { label: 'Produtos', route: '/admin/products', icon: 'products' },
     { label: 'Categorias', route: '/admin/categories', icon: 'categories' },

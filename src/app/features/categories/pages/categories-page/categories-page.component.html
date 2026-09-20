@@ -2,7 +2,7 @@
   <div class="categories-header">
     <div>
       <h1>Gerenciamento de Categorias</h1>
-      <p class="subtitle">Cadastre, edite e organize as categorias do catálogo da Barone Store.</p>
+      <p class="subtitle">Cadastre, edite e organize as categorias do catálogo da Barone Imports.</p>
     </div>
     <button class="add-btn" (click)="openAddModal()">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -61,7 +61,7 @@
       <tbody>
         @if (isLoading()) {
           <tr>
-            <td colspan="5" class="empty-row">Carregando categorias da Barone Store...</td>
+            <td colspan="5" class="empty-row">Carregando categorias da Barone Imports...</td>
           </tr>
         } @else {
           @for (cat of filteredCategories(); track cat.id) {

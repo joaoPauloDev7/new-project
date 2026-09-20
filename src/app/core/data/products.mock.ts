@@ -1,7 +1,7 @@
 import { Product } from '../models/store.models';
 
 /**
- * Produtos mockados da Barone Store.
+ * Produtos mockados da Barone Imports.
  * 
  * ATENÇÃO: Dados estruturados para demonstração e desenvolvimento.
  * Seguem rigorosamente a mesma interface dos modelos de produção da API NestJS.

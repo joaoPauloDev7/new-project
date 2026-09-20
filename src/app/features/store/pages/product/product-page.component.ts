@@ -82,7 +82,7 @@ export class ProductPageComponent implements OnInit {
           // SEO dinâmico com dados reais
           this.seoService.setPageMeta(
             product.name,
-            `${product.description ? product.description.slice(0, 155) : product.name}... Compre com atendimento exclusivo Barone Store.`,
+            `${product.description ? product.description.slice(0, 155) : product.name}... Compre com atendimento exclusivo Barone Imports.`,
             product.images && product.images.length > 0 ? product.images[0] : undefined
           );
         }

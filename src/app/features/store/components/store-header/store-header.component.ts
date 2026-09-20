@@ -22,7 +22,7 @@ export class StoreHeaderComponent {
   isMobileMenuOpen = signal(false);
 
   storeName = STORE_CONFIG.name;
-  whatsappLink = `https://wa.me/${STORE_CONFIG.whatsappNumber}`;
+  whatsappLink = `https://wa.me/${STORE_CONFIG.whatsappNumber}?text=${encodeURIComponent('Olá! Vim pelo site da Barone Imports e gostaria de falar com um consultor.')}`;
 
   toggleMobileMenu() {
     this.isMobileMenuOpen.update(val => !val);

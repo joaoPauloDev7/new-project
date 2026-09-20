@@ -16,5 +16,5 @@ export class StoreFooterComponent {
 
   storeName = STORE_CONFIG.name;
   currentYear = new Date().getFullYear();
-  whatsappLink = `https://wa.me/${STORE_CONFIG.whatsappNumber}`;
+  whatsappLink = `https://wa.me/${STORE_CONFIG.whatsappNumber}?text=${encodeURIComponent('Olá! Vim pelo site da Barone Imports e gostaria de falar com um atendente sobre o catálogo e pedidos.')}`;
 }
