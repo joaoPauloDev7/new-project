@@ -18,6 +18,7 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
 
   isCameraOpen = signal<boolean>(false);
   isCameraLoading = signal<boolean>(false);
+  cameraErrorMessage = signal<string | null>(null);
   cameraFacingMode = signal<'environment' | 'user'>('environment');
   private activeStream: MediaStream | null = null;
 
@@ -351,49 +352,71 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
 
   // Camera Live Controller
   async openCamera(): Promise<void> {
-    if (typeof window === 'undefined' || !navigator?.mediaDevices?.getUserMedia) {
-      this.cameraFallbackInput?.nativeElement?.click();
-      return;
-    }
+    if (typeof window === 'undefined') return;
 
+    this.cameraErrorMessage.set(null);
     this.isCameraOpen.set(true);
     this.isCameraLoading.set(true);
 
+    if (!navigator?.mediaDevices?.getUserMedia) {
+      this.isCameraLoading.set(false);
+      this.cameraErrorMessage.set('Seu navegador não possui suporte à câmera ou o ambiente atual não permite acesso direto (requer HTTPS ou localhost).');
+      return;
+    }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: this.cameraFacingMode() },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
-        },
-        audio: false
-      });
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: this.cameraFacingMode() },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+      } catch (errFirst) {
+        console.warn('Tentativa com restrições ideais falhou, tentando modo de vídeo básico:', errFirst);
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+      }
 
       this.activeStream = stream;
       this.isCameraLoading.set(false);
 
-      setTimeout(() => {
-        if (this.cameraVideo?.nativeElement) {
-          this.cameraVideo.nativeElement.srcObject = stream;
-          this.cameraVideo.nativeElement.play().catch(e => console.warn('Camera play warning:', e));
+      const attachVideo = (retries = 15) => {
+        const video = this.cameraVideo?.nativeElement || (document.getElementById('camera-video-feed') as HTMLVideoElement);
+        if (video) {
+          video.srcObject = stream;
+          video.play().catch(e => console.warn('Camera play warning:', e));
+        } else if (retries > 0) {
+          setTimeout(() => attachVideo(retries - 1), 60);
         }
-      }, 80);
+      };
+      attachVideo();
+
     } catch (err: any) {
       console.warn('Camera getUserMedia error:', err);
       this.isCameraLoading.set(false);
-      this.stopCamera();
 
       const isNoDevice = err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError';
-      const msg = isNoDevice
-        ? 'Nenhuma câmera física detectada neste computador. Abrindo seletor de arquivos...'
-        : 'Permissão de câmera não concedida. Abrindo seletor de arquivos...';
+      const isNotAllowed = err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError';
+      const isBusy = err.name === 'NotReadableError' || err.name === 'TrackStartError';
 
-      this.feedbackMessage.set({ text: msg, type: 'error' });
-      setTimeout(() => this.feedbackMessage.set(null), 4000);
+      let msg = 'Não foi possível iniciar a câmera.';
+      if (isNoDevice) {
+        msg = 'Nenhuma câmera física foi detectada neste computador ou dispositivo.';
+      } else if (isNotAllowed) {
+        msg = 'Permissão para usar a câmera foi negada no navegador. Permita o acesso à câmera para continuar.';
+      } else if (isBusy) {
+        msg = 'A câmera pode estar sendo usada por outro aplicativo (Zoom, Meet, Teams, etc.). Feche o outro app e tente novamente.';
+      } else if (err.message) {
+        msg = `Erro na câmera: ${err.message}`;
+      }
 
-      setTimeout(() => {
-        this.cameraFallbackInput?.nativeElement?.click();
-      }, 400);
+      this.cameraErrorMessage.set(msg);
     }
   }
 
@@ -407,31 +430,50 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
     }
 
     this.isCameraLoading.set(true);
+    this.cameraErrorMessage.set(null);
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: nextMode }
-        },
-        audio: false
-      });
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: nextMode },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+      } catch {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+      }
 
       this.activeStream = stream;
       this.isCameraLoading.set(false);
 
-      if (this.cameraVideo?.nativeElement) {
-        this.cameraVideo.nativeElement.srcObject = stream;
-        this.cameraVideo.nativeElement.play().catch(e => console.warn(e));
-      }
+      const attachVideo = (retries = 15) => {
+        const video = this.cameraVideo?.nativeElement || (document.getElementById('camera-video-feed') as HTMLVideoElement);
+        if (video) {
+          video.srcObject = stream;
+          video.play().catch(e => console.warn(e));
+        } else if (retries > 0) {
+          setTimeout(() => attachVideo(retries - 1), 60);
+        }
+      };
+      attachVideo();
+
     } catch (err) {
       console.warn('flipCamera error:', err);
       this.isCameraLoading.set(false);
+      this.cameraErrorMessage.set('Não foi possível alternar para a outra câmera.');
     }
   }
 
   capturePhoto(): void {
-    if (!this.cameraVideo?.nativeElement) return;
-    const video = this.cameraVideo.nativeElement;
+    const video = this.cameraVideo?.nativeElement || (document.getElementById('camera-video-feed') as HTMLVideoElement);
+    if (!video || !this.activeStream) return;
     
     const width = video.videoWidth || 1280;
     const height = video.videoHeight || 720;
@@ -443,7 +485,7 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
     
     if (ctx) {
       ctx.drawImage(video, 0, 0, width, height);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
 
       const current = this.uploadedImages();
       this.uploadedImages.set([
@@ -455,9 +497,7 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
         }
       ]);
 
-      this.feedbackMessage.set({ text: 'Foto capturada com sucesso!', type: 'success' });
-      setTimeout(() => this.feedbackMessage.set(null), 3000);
-      
+      this.showFeedback('Foto capturada com sucesso!', 'success');
       this.stopCamera();
     }
   }
@@ -474,6 +514,7 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
     }
     this.isCameraOpen.set(false);
     this.isCameraLoading.set(false);
+    this.cameraErrorMessage.set(null);
   }
 
   // Image actions
