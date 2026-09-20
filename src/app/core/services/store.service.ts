@@ -130,7 +130,7 @@ export class StoreService {
         return of([] as Category[]);
       })
     ).subscribe((categories) => {
-      if (categories && categories.length > 0) {
+      if (categories) {
         this.categoriesData.set(categories);
         if (isPlatformBrowser(this.platformId)) {
           try {

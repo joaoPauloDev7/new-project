@@ -26,11 +26,10 @@
     <!-- Desktop Nav (Center) -->
     <nav class="desktop-nav" aria-label="Navegação primária">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Início</a>
-      <a routerLink="/catalogo" routerLinkActive="active">Drops</a>
-      <a routerLink="/catalogo" [queryParams]="{categoria: 'camisetas'}">Camisetas Oversized</a>
-      <a routerLink="/catalogo" [queryParams]="{categoria: 'calcas'}">Calças Cargo</a>
-      <a routerLink="/catalogo" [queryParams]="{categoria: 'jaquetas'}">Hoodies & Jaquetas</a>
-      <a routerLink="/catalogo" [queryParams]="{categoria: 'acessorios'}">Acessórios</a>
+      <a routerLink="/catalogo" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Todos os Drops</a>
+      @for (cat of categories(); track cat.id) {
+        <a routerLink="/catalogo" [queryParams]="{categoria: cat.slug}">{{ cat.name }}</a>
+      }
     </nav>
 
     <!-- Actions (Right) -->
@@ -92,14 +91,16 @@
 
       <nav class="mobile-nav">
         <a routerLink="/" (click)="closeMobileMenu()" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Início</a>
-        <a routerLink="/catalogo" (click)="closeMobileMenu()" routerLinkActive="active">Todos os Drops</a>
-        <div class="mobile-nav-divider"></div>
-        <span class="mobile-nav-label">Categorias Street</span>
-        <a routerLink="/catalogo" [queryParams]="{categoria: 'camisetas'}" (click)="closeMobileMenu()">Camisetas Oversized & Boxy</a>
-        <a routerLink="/catalogo" [queryParams]="{categoria: 'calcas'}" (click)="closeMobileMenu()">Calças Cargo & Parachute</a>
-        <a routerLink="/catalogo" [queryParams]="{categoria: 'jaquetas'}" (click)="closeMobileMenu()">Hoodies & Jaquetas</a>
-        <a routerLink="/catalogo" [queryParams]="{categoria: 'shorts'}" (click)="closeMobileMenu()">Shorts & Bermudas Street</a>
-        <a routerLink="/catalogo" [queryParams]="{categoria: 'acessorios'}" (click)="closeMobileMenu()">Bags, Bonés & Acessórios</a>
+        <a routerLink="/catalogo" (click)="closeMobileMenu()" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Todos os Drops</a>
+        @if (categories().length > 0) {
+          <div class="mobile-nav-divider"></div>
+          <span class="mobile-nav-label">Categorias</span>
+          @for (cat of categories(); track cat.id) {
+            <a routerLink="/catalogo" [queryParams]="{categoria: cat.slug}" (click)="closeMobileMenu()">
+              {{ cat.name }}
+            </a>
+          }
+        }
         <div class="mobile-nav-divider"></div>
         <a routerLink="/carrinho" (click)="closeMobileMenu()" class="mobile-nav-cart">
           Sacola de Compras

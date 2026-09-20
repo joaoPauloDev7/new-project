@@ -4,6 +4,8 @@ import { CartService } from '../../../../core/services/cart.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { STORE_CONFIG } from '../../../../core/config/store.config';
 
+import { StoreService } from '../../../../core/services/store.service';
+
 @Component({
   selector: 'app-store-header',
   standalone: true,
@@ -14,6 +16,9 @@ import { STORE_CONFIG } from '../../../../core/config/store.config';
 export class StoreHeaderComponent {
   cartService = inject(CartService);
   authService = inject(AuthService);
+  private storeService = inject(StoreService);
+
+  categories = this.storeService.categories;
   isMobileMenuOpen = signal(false);
 
   storeName = STORE_CONFIG.name;

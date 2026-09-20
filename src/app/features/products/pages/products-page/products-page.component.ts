@@ -506,19 +506,75 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
 
   private handleFiles(files: FileList): void {
     Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
+      if (!file.type.startsWith('image/')) return;
+
+      this.compressImage(file, 1200, 0.85).then((dataUrl) => {
         const current = this.uploadedImages();
         const isMain = current.length === 0;
         this.uploadedImages.set([
           ...current,
           {
-            url: e.target.result,
+            url: dataUrl,
             isMain,
             order: current.length
           }
         ]);
+      }).catch(() => {
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          const current = this.uploadedImages();
+          const isMain = current.length === 0;
+          this.uploadedImages.set([
+            ...current,
+            {
+              url: e.target.result,
+              isMain,
+              order: current.length
+            }
+          ]);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  }
+
+  private compressImage(file: File, maxDim: number, quality: number): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e: any) => {
+        img.src = e.target.result;
       };
+      reader.onerror = reject;
+
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          return resolve(img.src);
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+        resolve(canvas.toDataURL(outputType, quality));
+      };
+      img.onerror = reject;
+
       reader.readAsDataURL(file);
     });
   }

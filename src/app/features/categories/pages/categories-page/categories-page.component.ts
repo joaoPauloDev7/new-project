@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AdminCategory, AdminProductsService } from '../../../../core/services/admin-products.service';
+import { StoreService } from '../../../../core/services/store.service';
 
 @Component({
   selector: 'app-categories-page',
@@ -12,6 +13,7 @@ import { AdminCategory, AdminProductsService } from '../../../../core/services/a
 export class CategoriesPageComponent implements OnInit {
   private fb = inject(FormBuilder);
   private adminProductsService = inject(AdminProductsService);
+  private storeService = inject(StoreService);
 
   showModal = signal<boolean>(false);
   isLoading = signal<boolean>(true);
@@ -118,6 +120,7 @@ export class CategoriesPageComponent implements OnInit {
           this.categories.update((list) =>
             list.map((c) => (c.id === editId ? { ...c, ...updated } : c))
           );
+          this.storeService.loadData();
           this.closeModal();
           this.isSubmitting.set(false);
           this.showFeedback('Categoria atualizada com sucesso!', 'success');
@@ -132,6 +135,7 @@ export class CategoriesPageComponent implements OnInit {
       this.adminProductsService.createCategory(payload).subscribe({
         next: (created) => {
           this.categories.update((list) => [created, ...list]);
+          this.storeService.loadData();
           this.closeModal();
           this.isSubmitting.set(false);
           this.showFeedback('Categoria criada com sucesso!', 'success');
@@ -161,6 +165,7 @@ export class CategoriesPageComponent implements OnInit {
     this.adminProductsService.deleteCategory(cat.id).subscribe({
       next: () => {
         this.categories.update((list) => list.filter((c) => c.id !== cat.id));
+        this.storeService.loadData();
         this.showFeedback('Categoria excluída com sucesso!', 'success');
       },
       error: (err) => {

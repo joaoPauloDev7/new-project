@@ -19,10 +19,9 @@
       <div class="footer-nav">
         <h4>Coleção & Drops</h4>
         <a routerLink="/catalogo">Todos os Drops</a>
-        <a routerLink="/catalogo" [queryParams]="{categoria: 'camisetas'}">Camisetas Oversized</a>
-        <a routerLink="/catalogo" [queryParams]="{categoria: 'calcas'}">Calças Cargo & Parachute</a>
-        <a routerLink="/catalogo" [queryParams]="{categoria: 'jaquetas'}">Hoodies & Jaquetas</a>
-        <a routerLink="/catalogo" [queryParams]="{categoria: 'acessorios'}">Bags & Acessórios</a>
+        @for (cat of categories(); track cat.id) {
+          <a routerLink="/catalogo" [queryParams]="{categoria: cat.slug}">{{ cat.name }}</a>
+        }
       </div>
 
       <!-- Atendimento & WhatsApp -->
