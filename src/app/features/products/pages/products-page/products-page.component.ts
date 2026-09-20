@@ -15,6 +15,7 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
 
   @ViewChild('cameraVideo') cameraVideo?: ElementRef<HTMLVideoElement>;
   @ViewChild('cameraFallbackInput') cameraFallbackInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
   isCameraOpen = signal<boolean>(false);
   isCameraLoading = signal<boolean>(false);
@@ -505,6 +506,15 @@ export class ProductsPageComponent implements OnInit, OnDestroy {
   triggerNativeCameraFallback(): void {
     this.stopCamera();
     this.cameraFallbackInput?.nativeElement?.click();
+  }
+
+  selectFileFromError(): void {
+    this.stopCamera();
+    if (this.fileInput?.nativeElement) {
+      this.fileInput.nativeElement.click();
+    } else if (this.cameraFallbackInput?.nativeElement) {
+      this.cameraFallbackInput.nativeElement.click();
+    }
   }
 
   stopCamera(): void {
