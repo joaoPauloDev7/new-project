@@ -45,8 +45,8 @@
         <span>WhatsApp</span>
       </a>
 
-      <!-- Admin Dashboard Link (when authenticated as ADMIN) -->
-      @if (authService.isAuthenticated() && authService.currentUser()?.role === 'ADMIN') {
+      <!-- Admin Dashboard Link (when authenticated) -->
+      @if (authService.isAuthenticated()) {
         <a routerLink="/admin/products" class="header-admin-link" title="Painel Administrativo" (click)="closeMobileMenu()">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="7" height="7"/>
@@ -108,7 +108,7 @@
             <span class="mobile-cart-badge">{{ cartService.totalItems() }} itens</span>
           }
         </a>
-        @if (authService.isAuthenticated() && authService.currentUser()?.role === 'ADMIN') {
+        @if (authService.isAuthenticated()) {
           <div class="mobile-nav-divider"></div>
           <a routerLink="/admin/products" (click)="closeMobileMenu()" class="mobile-admin-link">
             ⚙️ Painel Administrativo

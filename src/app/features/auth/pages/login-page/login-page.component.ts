@@ -51,9 +51,9 @@ export class LoginPageComponent {
         const queryReturnUrl = this.route.snapshot.queryParams['returnUrl'];
         let targetUrl = queryReturnUrl;
 
-        // Se não houver returnUrl específico ou se for a raiz '/', direciona ADMIN para o painel
+        // Se não houver returnUrl específico ou se for a raiz '/', direciona para o painel administrativo
         if (!targetUrl || targetUrl === '/') {
-          targetUrl = response.user?.role === 'ADMIN' ? '/admin/products' : '/';
+          targetUrl = '/admin/products';
         }
 
         this.router.navigateByUrl(targetUrl);
